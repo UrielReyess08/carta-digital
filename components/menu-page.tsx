@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { type menuData, getCategoriesInOrder, getProductsByCategory } from "@/lib/menu-data"
-import { ShoppingCart, Check, Trash2 } from "lucide-react"
+import { ShoppingCart, Check, Trash2, Coffee } from "lucide-react"
 import { generateWhatsAppMessage, getWhatsAppLink } from "@/lib/whatsapp-utils"
 
 
@@ -68,6 +68,13 @@ export function MenuPage() {
   window.location.href = whatsappUrl
 }
 
+  // Estado para controlar la categoría abierta (solo una a la vez)
+  const [openCategory, setOpenCategory] = useState<string | null>(null)
+
+  const toggleCategory = (category: string) => {
+    setOpenCategory((prev) => (prev === category ? null : category))
+  }
+
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-background">
@@ -76,9 +83,9 @@ export function MenuPage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <img
-                src="/images/imagen-20de-20whatsapp-202025-11-24-20a-20las-2016.jpg"
+                src="logo-el-vikingo-.png"
                 alt="El Vikingo Coffee Bike"
-                className="h-14 w-14 object-contain"
+                className="h-14 w-14 object-contain transform scale-290"
               />
               <div>
                 <h1 className="text-2xl font-bold text-primary">El Vikingo</h1>
@@ -110,47 +117,64 @@ export function MenuPage() {
               </p>
             </div>
 
-            <div className="space-y-8">
+            <div className="space-y-4">
               {categories.map((category) => {
                 const products = getProductsByCategory(category)
-                return (
-                  <div key={category}>
-                    <h3 className="text-lg font-bold text-foreground bg-yellow-300 px-4 py-2 mb-4 inline-block rounded-md shadow-sm">
-                      {category}
-                    </h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      {products.map((product) => {
-                        const isSelected = selectedProducts.has(product.id)
-                        const canSelect = !isSelected && selectedProducts.size < 5
+                const isOpen = openCategory === category
 
-                        return (
-                          <Card
-                            key={product.id}
-                            className={`p-4 cursor-pointer transition-all border-2 ${
-                              isSelected
-                                ? "border-primary bg-primary/5 shadow-md"
-                                : canSelect
-                                  ? "border-border hover:border-primary hover:shadow-md hover:bg-card"
-                                  : "border-border opacity-40 cursor-not-allowed"
-                            }`}
-                            onClick={() => canSelect && handleSelectProduct(product)}
-                          >
-                            <div className="flex justify-between items-start mb-2">
-                              <h4 className="font-semibold text-foreground flex-1">{product.name}</h4>
-                              {isSelected && (
-                                <div className="flex-shrink-0 ml-2">
-                                  <Check className="w-5 h-5 text-primary" />
+                return (
+                  <div key={category} className="border rounded-md overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => toggleCategory(category)}
+                      className="w-full text-left px-6 py-3 bg-yellow-300/80 hover:bg-yellow-300 font-bold flex items-center justify-between"
+                      aria-expanded={isOpen}
+                    >
+                      <div className="flex items-center gap-3">
+                        <Coffee className="w-5 h-5 text-primary" />
+                        <span>{category}</span>
+                        <Badge variant="secondary" className="ml-2">{products.length}</Badge>
+                      </div>
+                      <span className="text-sm">{isOpen ? "−" : "+"}</span>
+                    </button>
+
+                    {isOpen && (
+                      <div className="px-6 py-4 bg-white">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {products.map((product) => {
+                            const isSelected = selectedProducts.has(product.id)
+                            const canSelect = !isSelected && selectedProducts.size < 5
+
+                            return (
+                              <Card
+                                key={product.id}
+                                className={`p-4 cursor-pointer transition-all border-2 ${
+                                  isSelected
+                                    ? "border-primary bg-primary/5 shadow-md"
+                                    : canSelect
+                                      ? "border-border hover:border-primary hover:shadow-md hover:bg-card"
+                                      : "border-border opacity-40 cursor-not-allowed"
+                                }`}
+                                onClick={() => canSelect && handleSelectProduct(product)}
+                              >
+                                <div className="flex justify-between items-start mb-2">
+                                  <h4 className="font-semibold text-foreground flex-1">{product.name}</h4>
+                                  {isSelected && (
+                                    <div className="flex-shrink-0 ml-2">
+                                      <Check className="w-5 h-5 text-primary" />
+                                    </div>
+                                  )}
                                 </div>
-                              )}
-                            </div>
-                            <p className="text-2xl font-bold text-primary">S/.{product.price.toFixed(2)}</p>
-                            {product.description && (
-                              <p className="text-xs text-muted-foreground mt-2 italic">{product.description}</p>
-                            )}
-                          </Card>
-                        )
-                      })}
-                    </div>
+                                <p className="text-2xl font-bold text-primary">S/.{product.price.toFixed(2)}</p>
+                                {product.description && (
+                                  <p className="text-xs text-muted-foreground mt-2 italic">{product.description}</p>
+                                )}
+                              </Card>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )
               })}
