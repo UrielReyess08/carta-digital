@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { type menuData, getCategoriesInOrder, getProductsByCategory } from "@/lib/menu-data"
-import { ShoppingCart, Check, Trash2, Coffee } from "lucide-react"
+import { ShoppingCart, Check, Trash2, Coffee, Plus, Minus } from "lucide-react"
 import { generateWhatsAppMessage, getWhatsAppLink } from "@/lib/whatsapp-utils"
 
 
@@ -22,16 +22,25 @@ export function MenuPage() {
 
   const categories = getCategoriesInOrder()
 
-  const totalItems = selectedProducts.size
+  // Límite total de unidades por pedido
+  const MAX_TOTAL_ITEMS = 5
+
+  // totalItems ahora suma las cantidades (no productos distintos)
+  const totalItems = Array.from(selectedProducts.values()).reduce((sum, item) => sum + item.quantity, 0)
   const totalPrice = Array.from(selectedProducts.values()).reduce((sum, item) => sum + item.price * item.quantity, 0)
 
+  // Seleccionar / agregar (si ya seleccionado incrementa cantidad hasta el máximo)
   const handleSelectProduct = (product: (typeof menuData)[0]) => {
     const newSelected = new Map(selectedProducts)
+    const currentTotal = Array.from(newSelected.values()).reduce((s, it) => s + it.quantity, 0)
 
     if (newSelected.has(product.id)) {
-      newSelected.delete(product.id)
+      const existing = newSelected.get(product.id)!
+      if (currentTotal < MAX_TOTAL_ITEMS) {
+        newSelected.set(product.id, { ...existing, quantity: existing.quantity + 1 })
+      }
     } else {
-      if (newSelected.size <5) {
+      if (currentTotal < MAX_TOTAL_ITEMS) {
         newSelected.set(product.id, {
           id: product.id,
           name: product.name,
@@ -54,12 +63,34 @@ export function MenuPage() {
     setSelectedProducts(newSelected)
   }
 
+  const handleIncreaseQuantity = (productId: string) => {
+    const newSelected = new Map(selectedProducts)
+    const currentTotal = Array.from(newSelected.values()).reduce((s, it) => s + it.quantity, 0)
+    if (currentTotal >= MAX_TOTAL_ITEMS) return
+    const existing = newSelected.get(productId)
+    if (!existing) return
+    newSelected.set(productId, { ...existing, quantity: existing.quantity + 1 })
+    setSelectedProducts(newSelected)
+  }
+
+  const handleDecreaseQuantity = (productId: string) => {
+    const newSelected = new Map(selectedProducts)
+    const existing = newSelected.get(productId)
+    if (!existing) return
+    if (existing.quantity <= 1) {
+      newSelected.delete(productId)
+    } else {
+      newSelected.set(productId, { ...existing, quantity: existing.quantity - 1 })
+    }
+    setSelectedProducts(newSelected)
+  }
+
   const handleSendToWhatsApp = () => {
   if (selectedProducts.size === 0) return
-
   const items = Array.from(selectedProducts.values()).map((item) => ({
     name: item.name,
     price: item.price,
+    quantity: item.quantity ?? 1,
   }))
 
   const message = generateWhatsAppMessage(items, totalPrice)
@@ -142,33 +173,59 @@ export function MenuPage() {
                       <div className="px-6 py-4 bg-white">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {products.map((product) => {
-                            const isSelected = selectedProducts.has(product.id)
-                            const canSelect = !isSelected && selectedProducts.size < 5
+                            const selected = selectedProducts.get(product.id)
+                            const isSelected = Boolean(selected)
+                            const canSelect = !isSelected && totalItems < MAX_TOTAL_ITEMS
 
                             return (
                               <Card
                                 key={product.id}
-                                className={`p-4 cursor-pointer transition-all border-2 ${
+                                className={`p-4 transition-all border-2 flex flex-col justify-between ${
                                   isSelected
                                     ? "border-primary bg-primary/5 shadow-md"
                                     : canSelect
-                                      ? "border-border hover:border-primary hover:shadow-md hover:bg-card"
+                                      ? "border-border hover:border-primary hover:shadow-md hover:bg-card cursor-pointer"
                                       : "border-border opacity-40 cursor-not-allowed"
                                 }`}
                                 onClick={() => canSelect && handleSelectProduct(product)}
                               >
-                                <div className="flex justify-between items-start mb-2">
-                                  <h4 className="font-semibold text-foreground flex-1">{product.name}</h4>
-                                  {isSelected && (
-                                    <div className="flex-shrink-0 ml-2">
-                                      <Check className="w-5 h-5 text-primary" />
-                                    </div>
+                                <div>
+                                  <h4 className="font-semibold text-foreground">{product.name}</h4>
+                                  <p className="text-2xl font-bold text-primary">S/.{product.price.toFixed(2)}</p>
+                                  {product.description && (
+                                    <p className="text-xs text-muted-foreground mt-2 italic">{product.description}</p>
                                   )}
                                 </div>
-                                <p className="text-2xl font-bold text-primary">S/.{product.price.toFixed(2)}</p>
-                                {product.description && (
-                                  <p className="text-xs text-muted-foreground mt-2 italic">{product.description}</p>
-                                )}
+
+                                <div className="mt-3 flex items-center justify-between">
+                                  {isSelected ? (
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); handleDecreaseQuantity(product.id) }}
+                                        className="p-1 rounded bg-gray-100 hover:bg-gray-200"
+                                        aria-label={`Disminuir cantidad ${product.name}`}
+                                      >
+                                        <Minus className="w-4 h-4" />
+                                      </button>
+
+                                      <span className="font-semibold">{selected!.quantity}</span>
+
+                                      <button
+                                        onClick={(e) => { e.stopPropagation(); handleIncreaseQuantity(product.id) }}
+                                        className="p-1 rounded bg-gray-100 hover:bg-gray-200"
+                                        aria-label={`Aumentar cantidad ${product.name}`}
+                                      >
+                                        <Plus className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <span className="text-sm text-muted-foreground">Toca para agregar</span>
+                                  )}
+
+                                  {isSelected && (
+                                    <div className="text-sm text-muted-foreground">S/.{(product.price * selected!.quantity).toFixed(2)}</div>
+                                  )}
+                                </div>
                               </Card>
                             )
                           })}
@@ -199,8 +256,29 @@ export function MenuPage() {
                       <div key={item.id} className="flex justify-between items-center border-b border-border pb-3">
                         <div className="flex-1">
                           <p className="font-medium text-sm text-foreground">{item.name}</p>
-                          <p className="text-sm font-bold text-primary">S/.{item.price.toFixed(2)}</p>
+                          <p className="text-sm font-bold text-primary">S/.{(item.price * item.quantity).toFixed(2)}</p>
+
+                          <div className="flex items-center gap-2 mt-2">
+                            <button
+                              onClick={() => handleDecreaseQuantity(item.id)}
+                              className="p-1 rounded bg-gray-100 hover:bg-gray-200"
+                              aria-label={`Disminuir cantidad ${item.name}`}
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+
+                            <span className="font-semibold">{item.quantity}</span>
+
+                            <button
+                              onClick={() => handleIncreaseQuantity(item.id)}
+                              className="p-1 rounded bg-gray-100 hover:bg-gray-200"
+                              aria-label={`Aumentar cantidad ${item.name}`}
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
+
                         <button
                           onClick={() => handleRemoveProduct(item.id)}
                           className="ml-2 text-red-500 hover:text-red-700 transition-colors p-1"
