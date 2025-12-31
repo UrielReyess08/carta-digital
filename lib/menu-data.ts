@@ -51,7 +51,6 @@ export const menuData: MenuItem[] = [
     name: "Frambuesa",
     price: 11.0,
     category: "SMOOTHIES 12oz",
-    description: "Pura Fruta + Lechit + Crema",
   },
 
   // CAFÉ + LICOR

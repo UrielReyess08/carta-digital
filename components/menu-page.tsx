@@ -5,7 +5,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
-import { type menuData, getCategoriesInOrder, getProductsByCategory } from "@/lib/menu-data"
+import { type menuData, getCategoriesInOrder, getProductsByCategory, MenuItem } from "@/lib/menu-data"
 import { ShoppingCart, Check, Trash2, Coffee, Plus, Minus } from "lucide-react"
 import { generateWhatsAppMessage, getWhatsAppLink } from "@/lib/whatsapp-utils"
 
@@ -15,12 +15,21 @@ interface SelectedProduct {
   name: string
   price: number
   quantity: number
+  milkType?: "Lactosa" | "Deslactosada"
 }
 
 export function MenuPage() {
   const [selectedProducts, setSelectedProducts] = useState<Map<string, SelectedProduct>>(new Map())
 
   const categories = getCategoriesInOrder()
+
+  // Generar clave única: id + milkType
+  const getProductKey = (productId: string, milkType?: string): string => {
+    if (milkType) {
+      return `${productId}-${milkType.toLowerCase()}`
+    }
+    return productId
+  }
 
   // Límite total de unidades por pedido
   const MAX_TOTAL_ITEMS = 5
@@ -31,17 +40,25 @@ export function MenuPage() {
 
   // Seleccionar / agregar (si ya seleccionado incrementa cantidad hasta el máximo)
   const handleSelectProduct = (product: (typeof menuData)[0]) => {
+    // Si es smoothie Y NO está seleccionado, no hacer nada (el usuario debe elegir tipo de leche)
+    const isSmootie = product.category.includes("SMOOTHIES")
+    const alreadySelected = selectedProducts.has(product.id)
+    if (isSmootie && !alreadySelected) {
+      return
+    }
+
     const newSelected = new Map(selectedProducts)
     const currentTotal = Array.from(newSelected.values()).reduce((s, it) => s + it.quantity, 0)
 
-    if (newSelected.has(product.id)) {
-      const existing = newSelected.get(product.id)!
+    const key = getProductKey(product.id)
+    if (newSelected.has(key)) {
+      const existing = newSelected.get(key)!
       if (currentTotal < MAX_TOTAL_ITEMS) {
-        newSelected.set(product.id, { ...existing, quantity: existing.quantity + 1 })
+        newSelected.set(key, { ...existing, quantity: existing.quantity + 1 })
       }
     } else {
       if (currentTotal < MAX_TOTAL_ITEMS) {
-        newSelected.set(product.id, {
+        newSelected.set(key, {
           id: product.id,
           name: product.name,
           price: product.price,
@@ -53,34 +70,60 @@ export function MenuPage() {
     setSelectedProducts(newSelected)
   }
 
+  const handleAddWithMilkType = (product: MenuItem, milkType: "Lactosa" | "Deslactosada") => {
+    const newSelected = new Map(selectedProducts)
+    const currentTotal = Array.from(newSelected.values()).reduce((s, it) => s + it.quantity, 0)
+
+    if (currentTotal >= MAX_TOTAL_ITEMS) return
+
+    const key = getProductKey(product.id, milkType)
+    const existing = newSelected.get(key)
+
+    if (existing) {
+      // Si ya existe esa variante, incrementa la cantidad
+      newSelected.set(key, { ...existing, quantity: existing.quantity + 1 })
+    } else {
+      // Si no existe, crea una nueva entrada
+      newSelected.set(key, {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: 1,
+        milkType: milkType
+      })
+    }
+
+    setSelectedProducts(newSelected)
+  }
+
   const handleClearSelection = () => {
     setSelectedProducts(new Map())
   }
 
-  const handleRemoveProduct = (productId: string) => {
+  const handleRemoveProduct = (key: string) => {
     const newSelected = new Map(selectedProducts)
-    newSelected.delete(productId)
+    newSelected.delete(key)
     setSelectedProducts(newSelected)
   }
 
-  const handleIncreaseQuantity = (productId: string) => {
+  const handleIncreaseQuantity = (key: string) => {
     const newSelected = new Map(selectedProducts)
     const currentTotal = Array.from(newSelected.values()).reduce((s, it) => s + it.quantity, 0)
     if (currentTotal >= MAX_TOTAL_ITEMS) return
-    const existing = newSelected.get(productId)
+    const existing = newSelected.get(key)
     if (!existing) return
-    newSelected.set(productId, { ...existing, quantity: existing.quantity + 1 })
+    newSelected.set(key, { ...existing, quantity: existing.quantity + 1 })
     setSelectedProducts(newSelected)
   }
 
-  const handleDecreaseQuantity = (productId: string) => {
+  const handleDecreaseQuantity = (key: string) => {
     const newSelected = new Map(selectedProducts)
-    const existing = newSelected.get(productId)
+    const existing = newSelected.get(key)
     if (!existing) return
     if (existing.quantity <= 1) {
-      newSelected.delete(productId)
+      newSelected.delete(key)
     } else {
-      newSelected.set(productId, { ...existing, quantity: existing.quantity - 1 })
+      newSelected.set(key, { ...existing, quantity: existing.quantity - 1 })
     }
     setSelectedProducts(newSelected)
   }
@@ -91,6 +134,7 @@ export function MenuPage() {
     name: item.name,
     price: item.price,
     quantity: item.quantity ?? 1,
+    milkType: item.milkType
   }))
 
   const message = generateWhatsAppMessage(items, totalPrice)
@@ -173,8 +217,15 @@ export function MenuPage() {
                       <div className="px-6 py-4 bg-white">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           {products.map((product) => {
-                            const selected = selectedProducts.get(product.id)
-                            const isSelected = Boolean(selected)
+                            const isSmootie = product.category.includes("SMOOTHIES")
+                            // Para smoothies, check si existe cualquier variante (Lactosa o Deslactosada)
+                            // Para otros productos, check el id simple
+                            const hasAnyVariant = isSmootie && (
+                              selectedProducts.has(getProductKey(product.id, "Lactosa")) ||
+                              selectedProducts.has(getProductKey(product.id, "Deslactosada"))
+                            )
+                            const selected = selectedProducts.get(product.id) || (hasAnyVariant ? {} as SelectedProduct : undefined)
+                            const isSelected = Boolean(selected && Object.keys(selected).length > 0)
                             const canSelect = !isSelected && totalItems < MAX_TOTAL_ITEMS
 
                             return (
@@ -197,34 +248,67 @@ export function MenuPage() {
                                   )}
                                 </div>
 
-                                <div className="mt-3 flex items-center justify-between">
-                                  {isSelected ? (
-                                    <div className="flex items-center gap-2">
-                                      <button
-                                        onClick={(e) => { e.stopPropagation(); handleDecreaseQuantity(product.id) }}
-                                        className="p-1 rounded bg-gray-100 hover:bg-gray-200"
-                                        aria-label={`Disminuir cantidad ${product.name}`}
-                                      >
-                                        <Minus className="w-4 h-4" />
-                                      </button>
-
-                                      <span className="font-semibold">{selected!.quantity}</span>
-
-                                      <button
-                                        onClick={(e) => { e.stopPropagation(); handleIncreaseQuantity(product.id) }}
-                                        className="p-1 rounded bg-gray-100 hover:bg-gray-200"
-                                        aria-label={`Aumentar cantidad ${product.name}`}
-                                      >
-                                        <Plus className="w-4 h-4" />
-                                      </button>
-                                    </div>
-                                  ) : (
-                                    <span className="text-sm text-muted-foreground">Toca para agregar</span>
-                                  )}
-
-                                  {isSelected && (
-                                    <div className="text-sm text-muted-foreground">S/.{(product.price * selected!.quantity).toFixed(2)}</div>
-                                  )}
+                                <div className="mt-3">
+                                  {(() => {
+                                    const isSmootie = product.category.includes("SMOOTHIES")
+                                    
+                                    // Si es smoothie Y NO está seleccionado → mostrar botones de leche
+                                    if (isSmootie && !isSelected) {
+                                      return (
+                                        <div className="flex gap-2">
+                                          <button 
+                                            onClick={(e) => {
+                                              e.stopPropagation()
+                                              handleAddWithMilkType(product, "Lactosa")
+                                            }}
+                                            className="flex-1 px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-semibold transition-colors"
+                                          >
+                                             Lactosa
+                                          </button>
+                                          <button 
+                                            onClick={(e) => {
+                                              e.stopPropagation()
+                                              handleAddWithMilkType(product, "Deslactosada")
+                                            }}
+                                            className="flex-1 px-3 py-2 bg-green-100 hover:bg-green-200 rounded text-sm font-semibold transition-colors"
+                                          >
+                                             Deslactosada
+                                          </button>
+                                        </div>
+                                      )
+                                    }
+                                    
+                                    // Si YA está seleccionado (smoothie o no) → mostrar controles +/-
+                                    if (isSelected) {
+                                      return (
+                                        <div className="flex items-center justify-between">
+                                          <div className="flex items-center gap-2">
+                                            <button
+                                              onClick={(e) => { e.stopPropagation(); handleDecreaseQuantity(getProductKey(product.id, selected!.milkType)) }}
+                                              className="p-1 rounded bg-gray-100 hover:bg-gray-200"
+                                              aria-label={`Disminuir cantidad ${product.name}`}
+                                            >
+                                              <Minus className="w-4 h-4" />
+                                            </button>
+                                            <span className="font-semibold">{selected!.quantity}</span>
+                                            <button
+                                              onClick={(e) => { e.stopPropagation(); handleIncreaseQuantity(getProductKey(product.id, selected!.milkType)) }}
+                                              className="p-1 rounded bg-gray-100 hover:bg-gray-200"
+                                              aria-label={`Aumentar cantidad ${product.name}`}
+                                            >
+                                              <Plus className="w-4 h-4" />
+                                            </button>
+                                          </div>
+                                          <div className="text-sm text-muted-foreground">
+                                            S/.{(product.price * selected!.quantity).toFixed(2)}
+                                          </div>
+                                        </div>
+                                      )
+                                    }
+                                    
+                                    // Si NO es smoothie Y NO está seleccionado → mensaje "Toca para agregar"
+                                    return <span className="text-sm text-muted-foreground">Toca para agregar</span>
+                                  })()}
                                 </div>
                               </Card>
                             )
@@ -252,15 +336,18 @@ export function MenuPage() {
                       <p className="text-muted-foreground text-sm">Selecciona productos para comenzar</p>
                     </div>
                   ) : (
-                    Array.from(selectedProducts.values()).map((item) => (
-                      <div key={item.id} className="flex justify-between items-center border-b border-border pb-3">
+                    Array.from(selectedProducts.entries()).map(([key, item]) => (
+                      <div key={key} className="flex justify-between items-center border-b border-border pb-3">
                         <div className="flex-1">
                           <p className="font-medium text-sm text-foreground">{item.name}</p>
+                          {item.milkType && (
+                            <p className="text-xs text-muted-foreground">Leche: {item.milkType}</p>
+                          )}
                           <p className="text-sm font-bold text-primary">S/.{(item.price * item.quantity).toFixed(2)}</p>
 
                           <div className="flex items-center gap-2 mt-2">
                             <button
-                              onClick={() => handleDecreaseQuantity(item.id)}
+                              onClick={() => handleDecreaseQuantity(key)}
                               className="p-1 rounded bg-gray-100 hover:bg-gray-200"
                               aria-label={`Disminuir cantidad ${item.name}`}
                             >
@@ -270,7 +357,7 @@ export function MenuPage() {
                             <span className="font-semibold">{item.quantity}</span>
 
                             <button
-                              onClick={() => handleIncreaseQuantity(item.id)}
+                              onClick={() => handleIncreaseQuantity(key)}
                               className="p-1 rounded bg-gray-100 hover:bg-gray-200"
                               aria-label={`Aumentar cantidad ${item.name}`}
                             >
@@ -280,7 +367,7 @@ export function MenuPage() {
                         </div>
 
                         <button
-                          onClick={() => handleRemoveProduct(item.id)}
+                          onClick={() => handleRemoveProduct(key)}
                           className="ml-2 text-red-500 hover:text-red-700 transition-colors p-1"
                           title="Eliminar del pedido"
                         >

@@ -123,3 +123,53 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Animaciones del Splash Screen */
+@keyframes splash-scale {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes splash-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes splash-bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.animate-splash-scale {
+  animation: splash-scale 1.2s ease-out forwards;
+}
+
+.animate-splash-fade {
+  animation: splash-fade 1s ease-out forwards;
+}
+
+.animate-splash-fade-delay {
+  animation: splash-fade 1s ease-out forwards 0.3s both;
+}
+
+.animate-splash-bounce {
+  animation: splash-bounce 2s ease-in-out infinite;
+  animation-delay: 1s;
+}
