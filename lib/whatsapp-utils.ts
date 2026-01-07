@@ -1,13 +1,20 @@
 export const WHATSAPP_NUMBER = "+51963846269"
 
 export const generateWhatsAppMessage = (
-  products: { name: string; price: number; quantity: number; milkType?: string }[],
+  products: { name: string; price: number; quantity: number; milkType?: string; temperature?: string }[],
   total: number
 ): string => {
   const productsList = products
     .map((p) => {
-      const milkInfo = p.milkType ? ` (Leche ${p.milkType})` : ""
-      return `• ${p.name}${milkInfo} x${p.quantity} - S/.${(p.price * p.quantity).toFixed(2)}`
+      let info = ""
+      if (p.temperature || p.milkType) {
+        info = " ("
+        if (p.temperature) info += p.temperature
+        if (p.temperature && p.milkType) info += ", "
+        if (p.milkType) info += `Leche ${p.milkType}`
+        info += ")"
+      }
+      return `• ${p.name}${info} x${p.quantity} - S/.${(p.price * p.quantity).toFixed(2)}`
     })
     .join("\n")
 

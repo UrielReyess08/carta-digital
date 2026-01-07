@@ -16,6 +16,7 @@ interface SelectedProduct {
   price: number
   quantity: number
   milkType?: "Lactosa" | "Deslactosada"
+  temperature?: "Frío" | "Caliente"
 }
 
 export function MenuPage() {
@@ -23,12 +24,12 @@ export function MenuPage() {
 
   const categories = getCategoriesInOrder()
 
-  // Generar clave única: id + milkType
-  const getProductKey = (productId: string, milkType?: string): string => {
-    if (milkType) {
-      return `${productId}-${milkType.toLowerCase()}`
-    }
-    return productId
+  // Generar clave única: id + milkType + temperature
+  const getProductKey = (productId: string, milkType?: string, temperature?: string): string => {
+    let key = productId
+    if (milkType) key += `-${milkType.toLowerCase()}`
+    if (temperature) key += `-${temperature.toLowerCase()}`
+    return key
   }
 
   // Límite total de unidades por pedido
@@ -40,10 +41,11 @@ export function MenuPage() {
 
   // Seleccionar / agregar (si ya seleccionado incrementa cantidad hasta el máximo)
   const handleSelectProduct = (product: (typeof menuData)[0]) => {
-    // Si es smoothie Y NO está seleccionado, no hacer nada (el usuario debe elegir tipo de leche)
+    // Si es SIN CAFÉ o smoothie Y NO está seleccionado, no hacer nada (el usuario debe elegir opciones)
+    const isSinCafe = product.category.includes("SIN CAFÉ")
     const isSmootie = product.category.includes("SMOOTHIES")
     const alreadySelected = selectedProducts.has(product.id)
-    if (isSmootie && !alreadySelected) {
+    if ((isSinCafe || isSmootie) && !alreadySelected) {
       return
     }
 
@@ -96,6 +98,30 @@ export function MenuPage() {
     setSelectedProducts(newSelected)
   }
 
+  const handleAddWithTemperature = (product: MenuItem, temperature: "Frío" | "Caliente") => {
+    const newSelected = new Map(selectedProducts)
+    const currentTotal = Array.from(newSelected.values()).reduce((s, it) => s + it.quantity, 0)
+
+    if (currentTotal >= MAX_TOTAL_ITEMS) return
+
+    const key = getProductKey(product.id, undefined, temperature)
+    const existing = newSelected.get(key)
+
+    if (existing) {
+      newSelected.set(key, { ...existing, quantity: existing.quantity + 1 })
+    } else {
+      newSelected.set(key, {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        quantity: 1,
+        temperature: temperature
+      })
+    }
+
+    setSelectedProducts(newSelected)
+  }
+
   const handleClearSelection = () => {
     setSelectedProducts(new Map())
   }
@@ -134,7 +160,8 @@ export function MenuPage() {
     name: item.name,
     price: item.price,
     quantity: item.quantity ?? 1,
-    milkType: item.milkType
+    milkType: item.milkType,
+    temperature: item.temperature
   }))
 
   const message = generateWhatsAppMessage(items, totalPrice)
@@ -250,7 +277,50 @@ export function MenuPage() {
 
                                 <div className="mt-3">
                                   {(() => {
+                                    const isSinCafe = product.category.includes("SIN CAFÉ")
                                     const isSmootie = product.category.includes("SMOOTHIES")
+                                    
+                                    // Para SIN CAFÉ, check si existe cualquier variante
+                                    const hasSinCafeVariant = isSinCafe && (
+                                      selectedProducts.has(getProductKey(product.id, undefined, "Frío")) ||
+                                      selectedProducts.has(getProductKey(product.id, undefined, "Caliente"))
+                                    )
+                                    
+                                    // Para smoothies, check si existe cualquier variante
+                                    const hasSmoothieVariant = isSmootie && (
+                                      selectedProducts.has(getProductKey(product.id, "Lactosa")) ||
+                                      selectedProducts.has(getProductKey(product.id, "Deslactosada"))
+                                    )
+                                    
+                                    const selected = selectedProducts.get(product.id) || (hasSinCafeVariant || hasSmoothieVariant ? {} as SelectedProduct : undefined)
+                                    const isSelected = Boolean(selected && Object.keys(selected).length > 0)
+                                    const canSelect = !isSelected && totalItems < MAX_TOTAL_ITEMS
+                                    
+                                    // Si es SIN CAFÉ Y NO está seleccionado → mostrar botones de temperatura
+                                    if (isSinCafe && !isSelected) {
+                                      return (
+                                        <div className="flex gap-2">
+                                          <button 
+                                            onClick={(e) => {
+                                              e.stopPropagation()
+                                              handleAddWithTemperature(product, "Frío")
+                                            }}
+                                            className="flex-1 px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-semibold transition-colors"
+                                          >
+                                              Frío
+                                          </button>
+                                          <button 
+                                            onClick={(e) => {
+                                              e.stopPropagation()
+                                              handleAddWithTemperature(product, "Caliente")
+                                            }}
+                                            className="flex-1 px-3 py-2 bg-red-100 hover:bg-red-200 rounded text-sm font-semibold transition-colors"
+                                          >
+                                              Caliente
+                                          </button>
+                                        </div>
+                                      )
+                                    }
                                     
                                     // Si es smoothie Y NO está seleccionado → mostrar botones de leche
                                     if (isSmootie && !isSelected) {
@@ -278,13 +348,13 @@ export function MenuPage() {
                                       )
                                     }
                                     
-                                    // Si YA está seleccionado (smoothie o no) → mostrar controles +/-
+                                    // Si YA está seleccionado → mostrar controles +/-
                                     if (isSelected) {
                                       return (
                                         <div className="flex items-center justify-between">
                                           <div className="flex items-center gap-2">
                                             <button
-                                              onClick={(e) => { e.stopPropagation(); handleDecreaseQuantity(getProductKey(product.id, selected!.milkType)) }}
+                                              onClick={(e) => { e.stopPropagation(); handleDecreaseQuantity(getProductKey(product.id, selected!.milkType, selected!.temperature)) }}
                                               className="p-1 rounded bg-gray-100 hover:bg-gray-200"
                                               aria-label={`Disminuir cantidad ${product.name}`}
                                             >
@@ -292,7 +362,7 @@ export function MenuPage() {
                                             </button>
                                             <span className="font-semibold">{selected!.quantity}</span>
                                             <button
-                                              onClick={(e) => { e.stopPropagation(); handleIncreaseQuantity(getProductKey(product.id, selected!.milkType)) }}
+                                              onClick={(e) => { e.stopPropagation(); handleIncreaseQuantity(getProductKey(product.id, selected!.milkType, selected!.temperature)) }}
                                               className="p-1 rounded bg-gray-100 hover:bg-gray-200"
                                               aria-label={`Aumentar cantidad ${product.name}`}
                                             >
@@ -340,8 +410,12 @@ export function MenuPage() {
                       <div key={key} className="flex justify-between items-center border-b border-border pb-3">
                         <div className="flex-1">
                           <p className="font-medium text-sm text-foreground">{item.name}</p>
-                          {item.milkType && (
-                            <p className="text-xs text-muted-foreground">Leche: {item.milkType}</p>
+                          {(item.temperature || item.milkType) && (
+                            <p className="text-xs text-muted-foreground">
+                              {item.temperature && <span>{item.temperature}</span>}
+                              {item.temperature && item.milkType && <span> • </span>}
+                              {item.milkType && <span>Leche: {item.milkType}</span>}
+                            </p>
                           )}
                           <p className="text-sm font-bold text-primary">S/.{(item.price * item.quantity).toFixed(2)}</p>
 

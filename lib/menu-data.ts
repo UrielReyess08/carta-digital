@@ -7,179 +7,76 @@ export interface MenuItem {
 }
 
 export const menuData: MenuItem[] = [
-  // CAFÉ
-  { id: "cafe-americano", name: "Americano", price: 3.5, category: "CAFÉ 10oz", description: "Café clásico americano" },
-  { id: "cafe-espresso", name: "Espresso", price: 3.5, category: "CAFÉ 10oz" },
-  { id: "cafe-cortado", name: "Cortado", price: 4.0, category: "CAFÉ 10oz" },
-  { id: "cafe-cappuccino", name: "Cappuccino", price: 5.0, category: "CAFÉ 10oz" },
-  { id: "cafe-moccacino", name: "Moccacino", price: 6.0, category: "CAFÉ 10oz" },
-  {
-    id: "cafe-winter",
-    name: "Winter / Summer Coffee",
-    price: 5.5,
-    category: "CAFÉ 10oz",
-    description: "Café americano + crema",
-  },
-  {
-    id: "cafe-vikingo",
-    name: "Vikingo Power Coffee",
-    price: 7.0,
-    category: "CAFÉ 10oz",
-    description: "Doble espresso + Crema",
-  },
-  {
-    id: "cafe-latte",
-    name: "Coffee Latte (12oz)",
-    price: 8.0,
-    category: "CAFÉ 10oz",
-    description: "Espresso + Leche + Crema",
-  },
 
-  // FRAPPUCCINOS
-  { id: "frap-cafe", name: "Café", price: 10.0, category: "FRAPPUCCINOS 12oz" },
-  { id: "frap-caramel", name: "Caramel", price: 10.0, category: "FRAPPUCCINOS 12oz" },
-  { id: "frap-moca", name: "Moca", price: 10.0, category: "FRAPPUCCINOS 12oz" },
-  { id: "frap-matcha", name: "Matcha", price: 10.0, category: "FRAPPUCCINOS 12oz" },
+  // CAFÉ 7oz
+  { id: "cafe-vikingo-baileys-7", name: "Vikingo Baileys Coffee", price: 6.00, category: "CAFÉ 7oz", description: "Espresso + Baileys + crema" },
+  { id: "cafe-vikingo-bombom-7", name: "Vikingo Bom bóm", price: 5.00, category: "CAFÉ 7oz", description: "Espresso + Ron + crema" },
 
-  // SMOOTHIES
-  { id: "smooth-fresa", name: "Fresa", price: 10.0, category: "SMOOTHIES 12oz" },
-  { id: "smooth-lucuma", name: "Lúcuma", price: 10.0, category: "SMOOTHIES 12oz" },
-  { id: "smooth-mango", name: "Mango", price: 10.0, category: "SMOOTHIES 12oz" },
-  { id: "smooth-arandano", name: "Arándano", price: 10.0, category: "SMOOTHIES 12oz" },
-  {
-    id: "smooth-frambuesa",
-    name: "Frambuesa",
-    price: 11.0,
-    category: "SMOOTHIES 12oz",
-  },
+  // CAFÉ 10oz
+  { id: "cafe-americano-10", name: "Americano", price: 3.00, category: "CAFÉ 10oz" },
+  { id: "cafe-espresso-10", name: "Espresso", price: 3.00, category: "CAFÉ 10oz" },
+  { id: "cafe-cappuccino-10", name: "Cappuccino", price: 4.00, category: "CAFÉ 10oz" },
+  { id: "cafe-mocaccino-10", name: "Mocaccino", price: 5.00, category: "CAFÉ 10oz" },
+  { id: "cafe-winter-summer-10", name: "Winter / Summer Coffee", price: 4.00, category: "CAFÉ 10oz", description: "Americano + crema" },
+  { id: "cafe-vikingo-power-10", name: "Vikingo Power Coffee", price: 5.00, category: "CAFÉ 10oz", description: "Doble espresso + crema" },
 
-  // CAFÉ + LICOR
-  { id: "cafelicor-baileys", name: "Vikingo Baileys Coffee", price: 8.0, category: "CAFÉ + LICOR 7oz" },
-  { id: "cafelicor-brandy", name: "Vikingo Brandy Coffee", price: 8.0, category: "CAFÉ + LICOR 7oz" },
-  { id: "cafelicor-irish", name: "Vikingo Irish Coffee", price: 8.0, category: "CAFÉ + LICOR 7oz" },
-  {
-    id: "cafelicor-bombom",
-    name: "Vikingo Bom Bom",
-    price: 6.0,
-    category: "CAFÉ + LICOR 7oz",
-    description: "Espresso + Licor + Crema",
-  },
+  // CAFÉ 12oz
+  { id: "cafe-latte-12", name: "Coffee latte", price: 7.00, category: "CAFÉ 12oz", description: "Espresso + leche + crema" },
 
-  // SIN CAFÉ
-  { id: "sincafe-choco", name: "Choco Milk", price: 8.0, category: "SIN CAFÉ 12oz" },
-  { id: "sincafe-caramel", name: "Caramel Latte", price: 8.0, category: "SIN CAFÉ 12oz" },
-  {
-    id: "sincafe-matcha",
-    name: "Matcha Latte",
-    price: 8.0,
-    category: "SIN CAFÉ 12oz",
-    description: "Frío. Tibio/Caliente + Crema",
-  },
+  // SIN CAFÉ 12oz
+  { id: "sincafe-choco-milk-12", name: "Choco milk", price: 7.00, category: "SIN CAFÉ 12oz", description: "Cacao + leche + crema" },
+  { id: "sincafe-choco-baileys-12", name: "Choco Baileys", price: 10.00, category: "SIN CAFÉ 12oz" },
+  { id: "sincafe-caramel-latte-12", name: "Caramel Latte", price: 7.00, category: "SIN CAFÉ 12oz" },
+  { id: "sincafe-baileys-latte-12", name: "Baileys Latte", price: 10.00, category: "SIN CAFÉ 12oz" },
 
-  // SIN CAFÉ + LICOR
-  { id: "sincafelicor-lumumba", name: "Lumumba", price: 10.0, category: "SIN CAFÉ + LICOR 12oz" },
-  { id: "sincafelicor-baileys", name: "Choco Baileys", price: 10.0, category: "SIN CAFÉ + LICOR 12oz" },
-  {
-    id: "sincafelicor-latte",
-    name: "Baileys Latte",
-    price: 10.0,
-    category: "SIN CAFÉ + LICOR 12oz",
-    description: "Frío. Tibio/Caliente + Crema",
-  },
+  // FRAPPUCCINOS 12oz
+  { id: "frap-cafe-12", name: "Café", price: 9.00, category: "FRAPPUCCINOS 12oz" },
+  { id: "frap-caramel-12", name: "Caramel", price: 9.00, category: "FRAPPUCCINOS 12oz" },
+  { id: "frap-moca-12", name: "Moca", price: 9.00, category: "FRAPPUCCINOS 12oz" },
 
-  // INFUSIONES
-  { id: "infus-canela", name: "Té con Canela", price: 3.0, category: "INFUSIONES 10oz" },
-  { id: "infus-jazmin", name: "Té Jazmín", price: 3.0, category: "INFUSIONES 10oz" },
+  // SMOOTHIES 12oz
+  { id: "smooth-fresa-12", name: "Fresa", price: 9.00, category: "SMOOTHIES 12oz" },
+  { id: "smooth-lucuma-12", name: "Lúcuma", price: 9.00, category: "SMOOTHIES 12oz" },
+  { id: "smooth-mango-12", name: "Mango", price: 9.00, category: "SMOOTHIES 12oz" },
+  { id: "smooth-arandano-12", name: "Arándano", price: 9.00, category: "SMOOTHIES 12oz" },
+  { id: "smooth-frambuesa-12", name: "Frambuesa", price: 11.00, category: "SMOOTHIES 12oz" },
 
-  // FROZEN
-  { id: "frozen-fresa", name: "Fresa", price: 9.0, category: "FROZEN 12oz" },
-  { id: "frozen-lucuma", name: "Lúcuma", price: 9.0, category: "FROZEN 12oz" },
-  { id: "frozen-mango", name: "Mango", price: 9.0, category: "FROZEN 12oz" },
-  { id: "frozen-arandano", name: "Arándano", price: 9.0, category: "FROZEN 12oz" },
-  { id: "frozen-maracuya", name: "Maracuyá", price: 9.0, category: "FROZEN 12oz" },
-  { id: "frozen-frambuesa", name: "Frambuesa", price: 10.0, category: "FROZEN 12oz" },
+  // FROZEN 12oz
+  { id: "frozen-fresa-12", name: "Fresa", price: 8.00, category: "FROZEN 12oz" },
+  { id: "frozen-lucuma-12", name: "Lúcuma", price: 8.00, category: "FROZEN 12oz" },
+  { id: "frozen-mango-12", name: "Mango", price: 8.00, category: "FROZEN 12oz" },
+  { id: "frozen-arandano-12", name: "Arándano", price: 8.00, category: "FROZEN 12oz" },
+  { id: "frozen-maracuya-12", name: "Maracuyá", price: 8.00, category: "FROZEN 12oz" },
+  { id: "frozen-frambuesa-12", name: "Frambuesa", price: 10.00, category: "FROZEN 12oz" },
+
+  // SNACKS
+  { id: "snack-sandwich-pollo", name: "Sándwich – Pollo al horno", price: 6.00, category: "SNACKS" },
+  { id: "snack-sandwich-tocino", name: "Sándwich – Tocino ahumado", price: 6.00, category: "SNACKS" },
+  { id: "snack-crepe-vainilla", name: "Crepe – Vainilla", price: 4.00, category: "SNACKS" },
+  { id: "snack-crepe-maracuya", name: "Crepe – Maracuyá", price: 4.00, category: "SNACKS" },
+  { id: "snack-kanelbullar", name: "Kanelbullar (rollo de canela sueco)", price: 4.00, category: "SNACKS" },
+  { id: "snack-chokladbollar", name: "Chokladbollar (trufas de chocolate sueco)", price: 2.00, category: "SNACKS" },
 
   // ADICIONALES
-  { id: "adic-baileys", name: "Shot Baileys", price: 3.0, category: "ADICIONALES" },
-  { id: "adic-whisky", name: "Shot Whisky", price: 3.0, category: "ADICIONALES" },
-  { id: "adic-brandy", name: "Shot Brandy", price: 3.0, category: "ADICIONALES" },
-  { id: "adic-ron", name: "Shot Ron", price: 2.0, category: "ADICIONALES" },
-  { id: "adic-espresso", name: "Shot Espresso", price: 3.0, category: "ADICIONALES" },
-  { id: "adic-crema", name: "Crema", price: 1.0, category: "ADICIONALES" },
-  { id: "adic-leche", name: "Extra Leche", price: 1.0, category: "ADICIONALES" },
-
-  // SÁNDWICHES
-  { id: "sand-pollo", name: "Pollo al Horno", price: 7.0, category: "SÁNDWICHES" },
-  { id: "sand-tocino", name: "Tocino Ahumado", price: 7.0, category: "SÁNDWICHES" },
-  {
-    id: "sand-servicio",
-    name: "Servicio en Pan de Masa Madre con Crema Casera al Estilo de Suecia",
-    price: 7.0,
-    category: "SÁNDWICHES",
-  },
-
-  // CREPES
-  {
-    id: "crepe-vainilla",
-    name: "Crepe Casero - Vainilla",
-    price: 4.0,
-    category: "CREPES",
-    description: "Relleno con crema",
-  },
-  {
-    id: "crepe-chocolate",
-    name: "Crepe Casero - Chocolate",
-    price: 4.0,
-    category: "CREPES",
-    description: "Relleno con crema",
-  },
-  { id: "crepe-cafe", name: "Crepe Casero - Café", price: 4.0, category: "CREPES", description: "Relleno con crema" },
-  {
-    id: "crepe-maracuya",
-    name: "Crepe Casero - Maracuyá",
-    price: 4.0,
-    category: "CREPES",
-    description: "Relleno con crema",
-  },
-  { id: "crepe-limon", name: "Crepe Casero - Limón", price: 4.0, category: "CREPES", description: "Relleno con crema" },
-
-  // MUFFINS
-  { id: "muffin-vainilla", name: "Vainilla", price: 4.0, category: "MUFFINS" },
-  { id: "muffin-chocolate", name: "Chocolate", price: 4.0, category: "MUFFINS" },
-
-  // KANELBUILLAR
-  { id: "kanel-rollo", name: "Rollos de Canela", price: 4.0, category: "KANELBUILLAR", description: "Sueco" },
-
-  // CHOKLADBOLLAR
-  {
-    id: "chokol-tradicional",
-    name: "Traditional Chocolate",
-    price: 2.5,
-    category: "CHOKLADBOLLAR",
-    description: "Sueco",
-  },
+  { id: "adic-shot-baileys", name: "Shot de Baileys", price: 3.00, category: "ADICIONALES" },
+  { id: "adic-shot-ron", name: "Shot de Ron", price: 2.00, category: "ADICIONALES" },
+  { id: "adic-crema", name: "Crema", price: 2.00, category: "ADICIONALES" },
 ]
 
 export const getCategoriesInOrder = (): string[] => {
-  const categories = new Map<string, number>()
-  const order = [
+  return [
+    "CAFÉ 7oz",
     "CAFÉ 10oz",
+    "CAFÉ 12oz",
+    "SIN CAFÉ 12oz",
     "FRAPPUCCINOS 12oz",
     "SMOOTHIES 12oz",
-    "CAFÉ + LICOR 7oz",
-    "SIN CAFÉ 12oz",
-    "SIN CAFÉ + LICOR 12oz",
-    "INFUSIONES 10oz",
     "FROZEN 12oz",
+    "SNACKS",
     "ADICIONALES",
-    "SÁNDWICHES",
-    "CREPES",
-    "MUFFINS",
-    "KANELBUILLAR",
-    "CHOKLADBOLLAR",
   ]
 
-  return order
+  //return order
 }
 
 export const getProductsByCategory = (category: string): MenuItem[] => {
