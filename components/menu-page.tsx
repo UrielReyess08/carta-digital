@@ -173,8 +173,33 @@ export function MenuPage() {
   // Estado para controlar la categoría abierta (solo una a la vez)
   const [openCategory, setOpenCategory] = useState<string | null>(null)
 
+  const pushDataLayerEvent = (eventName: string, params: Record<string, any>) => {
+    if (typeof window === "undefined") return
+    ;(window as any).dataLayer = (window as any).dataLayer || []
+    ;(window as any).dataLayer.push({
+      event: eventName,
+      ...params,
+    })
+  }
+
   const toggleCategory = (category: string) => {
-    setOpenCategory((prev) => (prev === category ? null : category))
+    setOpenCategory((prev) => {
+      const willOpen = prev !== category
+      const next = willOpen ? category : null
+
+      if (willOpen) {
+        const products = getProductsByCategory(category)
+        const categoryIndex = Math.max(1, categories.indexOf(category) + 1)
+
+        pushDataLayerEvent("view_category", {
+          category_name: category,
+          category_index: categoryIndex,
+          items_count: products.length,
+        })
+      }
+
+      return next
+    })
   }
 
 
