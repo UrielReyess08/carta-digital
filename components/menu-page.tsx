@@ -283,7 +283,7 @@ export function MenuPage() {
                             return (
                               <Card
                                 key={product.id}
-                                className={`p-4 transition-all border-2 flex flex-col justify-between ${
+                                className={`p-4 transition-all border-2 flex flex-row items-start gap-3 ${
                                   isSelected
                                     ? "border-primary bg-primary/5 shadow-md"
                                     : canSelect
@@ -292,15 +292,16 @@ export function MenuPage() {
                                 }`}
                                 onClick={() => canSelect && handleSelectProduct(product)}
                               >
-                                <div>
-                                  <h4 className="font-semibold text-foreground">{product.name}</h4>
-                                  <p className="text-2xl font-bold text-primary">S/.{product.price.toFixed(2)}</p>
-                                  {product.description && (
-                                    <p className="text-xs text-muted-foreground mt-2 italic">{product.description}</p>
-                                  )}
-                                </div>
+                                <div className="flex-1 flex flex-col justify-between">
+                                  <div>
+                                    <h4 className="font-semibold text-foreground">{product.name}</h4>
+                                    <p className="text-2xl font-bold text-primary">S/.{product.price.toFixed(2)}</p>
+                                    {product.description && (
+                                      <p className="text-xs text-muted-foreground mt-2 italic">{product.description}</p>
+                                    )}
+                                  </div>
 
-                                <div className="mt-3">
+                                  <div className="mt-3">
                                   {(() => {
                                     const isSinCafe = product.category.includes("SIN CAFÉ")
                                     const isSmootie = product.category.includes("SMOOTHIES")
@@ -324,13 +325,13 @@ export function MenuPage() {
                                     // Si es SIN CAFÉ Y NO está seleccionado → mostrar botones de temperatura
                                     if (isSinCafe && !isSelected) {
                                       return (
-                                        <div className="flex gap-2">
+                                        <div className="flex flex-col gap-2">
                                           <button 
                                             onClick={(e) => {
                                               e.stopPropagation()
                                               handleAddWithTemperature(product, "Frío")
                                             }}
-                                            className="flex-1 px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-semibold transition-colors"
+                                            className="w-[120px] h-8 px-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-semibold transition-colors"
                                           >
                                               Frío
                                           </button>
@@ -339,7 +340,7 @@ export function MenuPage() {
                                               e.stopPropagation()
                                               handleAddWithTemperature(product, "Caliente")
                                             }}
-                                            className="flex-1 px-3 py-2 bg-red-100 hover:bg-red-200 rounded text-sm font-semibold transition-colors"
+                                            className="w-[120px] h-8 px-2 bg-red-100 hover:bg-red-200 rounded text-sm font-semibold transition-colors"
                                           >
                                               Caliente
                                           </button>
@@ -350,13 +351,13 @@ export function MenuPage() {
                                     // Si es smoothie Y NO está seleccionado → mostrar botones de leche
                                     if (isSmootie && !isSelected) {
                                       return (
-                                        <div className="flex gap-2">
+                                        <div className="flex flex-col gap-2">
                                           <button 
                                             onClick={(e) => {
                                               e.stopPropagation()
                                               handleAddWithMilkType(product, "Lactosa")
                                             }}
-                                            className="flex-1 px-3 py-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-semibold transition-colors"
+                                            className="w-[120px] h-8 px-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-semibold transition-colors"
                                           >
                                              Lactosa
                                           </button>
@@ -365,7 +366,7 @@ export function MenuPage() {
                                               e.stopPropagation()
                                               handleAddWithMilkType(product, "Deslactosada")
                                             }}
-                                            className="flex-1 px-3 py-2 bg-green-100 hover:bg-green-200 rounded text-sm font-semibold transition-colors"
+                                            className="w-[120px] h-8 px-2 bg-green-100 hover:bg-green-200 rounded text-sm font-semibold transition-colors"
                                           >
                                              Deslactosada
                                           </button>
@@ -404,7 +405,17 @@ export function MenuPage() {
                                     // Si NO es smoothie Y NO está seleccionado → mensaje "Toca para agregar"
                                     return <span className="text-sm text-muted-foreground">Toca para agregar</span>
                                   })()}
+                                  </div>
                                 </div>
+
+                                {/* Imagen a la DERECHA */}
+                                {product.image && (
+                                  <img
+                                    src={product.image}
+                                    alt={product.name}
+                                    className="w-30 h-30 object-cover rounded-lg flex-shrink-0"
+                                  />
+                                )}
                               </Card>
                             )
                           })}
