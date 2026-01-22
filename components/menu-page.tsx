@@ -15,6 +15,7 @@ interface SelectedProduct {
   name: string
   price: number
   quantity: number
+  category?: string
   milkType?: "Lactosa" | "Deslactosada"
   temperature?: "Frío" | "Caliente"
 }
@@ -33,7 +34,7 @@ export function MenuPage() {
   }
 
   // Límite total de unidades por pedido
-  const MAX_TOTAL_ITEMS = 5
+  const MAX_TOTAL_ITEMS = 12
 
   // totalItems ahora suma las cantidades (no productos distintos)
   const totalItems = Array.from(selectedProducts.values()).reduce((sum, item) => sum + item.quantity, 0)
@@ -57,7 +58,16 @@ export function MenuPage() {
       const existing = newSelected.get(key)!
       if (currentTotal < MAX_TOTAL_ITEMS) {
         newSelected.set(key, { ...existing, quantity: existing.quantity + 1 })
-      }
+
+        pushDataLayerEvent("add_product", {
+        product_name: product.name,
+        product_category: product.category,
+        product_variant: "default", // POR DEFECTO NO CAMBIARA NADA
+        price: product.price,
+        quantity: 1,
+        page_path: window.location.pathname
+    })
+  }
     } else {
       if (currentTotal < MAX_TOTAL_ITEMS) {
         newSelected.set(key, {
@@ -66,9 +76,17 @@ export function MenuPage() {
           price: product.price,
           quantity: 1,
         })
-      }
-    }
 
+        pushDataLayerEvent("add_product", {
+        product_name: product.name,
+        product_category: product.category,
+        product_variant: "default", // POR DEFECTO NO CAMBIARA NADA
+        price: product.price,
+        quantity: 1,
+        page_path: window.location.pathname
+      })
+    }
+  }
     setSelectedProducts(newSelected)
   }
 
@@ -91,9 +109,19 @@ export function MenuPage() {
         name: product.name,
         price: product.price,
         quantity: 1,
-        milkType: milkType
+        milkType: milkType,
+        category: product.category
       })
     }
+
+    pushDataLayerEvent("add_product", {
+      product_name: product.name,
+      product_category: product.category,
+      product_variant: milkType, //TIPO DE LECHE
+      price: product.price,
+      quantity: 1,
+      page_path: window.location.pathname
+    })
 
     setSelectedProducts(newSelected)
   }
@@ -119,6 +147,15 @@ export function MenuPage() {
       })
     }
 
+    pushDataLayerEvent("add_product", {
+      product_name: product.name,
+      product_category: product.category,
+      product_variant: temperature, //TEMPERATURA
+      price: product.price,
+      quantity: 1,
+      page_path: window.location.pathname
+    })
+
     setSelectedProducts(newSelected)
   }
 
@@ -139,6 +176,16 @@ export function MenuPage() {
     const existing = newSelected.get(key)
     if (!existing) return
     newSelected.set(key, { ...existing, quantity: existing.quantity + 1 })
+
+    pushDataLayerEvent("add_product", {
+      product_name: existing.name,
+      product_category: "unknown",
+      product_variant: existing.milkType || existing.temperature || "default", 
+      price: existing.price,
+      quantity: 1,
+      page_path: window.location.pathname
+    })
+
     setSelectedProducts(newSelected)
   }
 
@@ -256,7 +303,7 @@ useEffect(() => {
 
             <div className="flex items-center gap-2">
               <ShoppingCart className="w-6 h-6 text-primary" />
-              <Badge className="text-base px-3 py-1 bg-primary text-white">{totalItems} / 5</Badge>
+              <Badge className="text-base px-3 py-1 bg-primary text-white">{totalItems} / 10</Badge>
             </div>
           </div>
         </div>
@@ -269,8 +316,8 @@ useEffect(() => {
             <div className="mb-8">
               <h2 className="text-3xl font-bold mb-2 text-foreground">Selecciona tus Productos</h2>
               <p className="text-muted-foreground flex items-center gap-2">
-                <span className="text-sm font-medium">Máximo 5 productos por pedido</span>
-                {totalItems === 5 && (
+                <span className="text-sm font-medium">Máximo 12 productos por pedido</span>
+                {totalItems === 12 && (
                   <Badge variant="destructive" className="text-xs">
                     Límite alcanzado
                   </Badge>
