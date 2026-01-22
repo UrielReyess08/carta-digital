@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -181,6 +181,40 @@ export function MenuPage() {
       ...params,
     })
   }
+
+  const firedScrollThresholds = useRef<Set<number>>(new Set())
+
+const SCROLL_THRESHOLDS = [25, 50, 75, 90]
+
+useEffect(() => {
+  const onScroll = () => {
+    const doc = document.documentElement
+
+    const scrollTop = window.scrollY || doc.scrollTop
+
+    const scrollHeight = doc.scrollHeight - window.innerHeight
+    if (scrollHeight <= 0) return
+
+    const percent = Math.round((scrollTop / scrollHeight) * 100)
+
+    for (const threshold of SCROLL_THRESHOLDS) {
+      if (percent >= threshold && !firedScrollThresholds.current.has(threshold)) {
+        firedScrollThresholds.current.add(threshold)
+
+        pushDataLayerEvent("scroll_menu", {
+          scroll_percent: threshold,       
+          scroll_current: percent,      
+          page_path: window.location.pathname,
+        })
+      }
+    }
+  }
+
+  window.addEventListener("scroll", onScroll, { passive: true })
+  onScroll()
+
+  return () => window.removeEventListener("scroll", onScroll)
+}, [])
 
   const toggleCategory = (category: string) => {
     setOpenCategory((prev) => {
