@@ -192,6 +192,7 @@ export function MenuPage() {
   }
 
   const handleClearSelection = () => {
+    firedStartOrder.current = false //Reseta el flag para no volver a disparar
     setSelectedProducts(new Map())
   }
 
