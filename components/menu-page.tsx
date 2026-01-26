@@ -75,6 +75,7 @@ export function MenuPage() {
           name: product.name,
           price: product.price,
           quantity: 1,
+          category: product.category,
         })
 
         pushDataLayerEvent("add_product", {
@@ -143,7 +144,8 @@ export function MenuPage() {
         name: product.name,
         price: product.price,
         quantity: 1,
-        temperature: temperature
+        temperature: temperature,
+        category: product.category,
       })
     }
 
@@ -172,14 +174,16 @@ export function MenuPage() {
   const handleIncreaseQuantity = (key: string) => {
     const newSelected = new Map(selectedProducts)
     const currentTotal = Array.from(newSelected.values()).reduce((s, it) => s + it.quantity, 0)
+
     if (currentTotal >= MAX_TOTAL_ITEMS) return
+
     const existing = newSelected.get(key)
     if (!existing) return
     newSelected.set(key, { ...existing, quantity: existing.quantity + 1 })
 
     pushDataLayerEvent("add_product", {
       product_name: existing.name,
-      product_category: "unknown",
+      product_category: existing.category || "unknown",
       product_variant: existing.milkType || existing.temperature || "default", 
       price: existing.price,
       quantity: 1,
