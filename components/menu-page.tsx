@@ -249,6 +249,12 @@ export function MenuPage() {
   const message = generateWhatsAppMessage(items, totalPrice)
   const whatsappUrl = getWhatsAppLink(message)
 
+  pushDataLayerEvent("send_order_whatsapp", {
+    items_count: totalItems,
+    order_value: Number(totalPrice.toFixed(2)),
+    page_path: window.location.pathname
+  })
+
   window.location.href = whatsappUrl
 }
 
