@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { use, useEffect, useRef, useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
@@ -86,6 +86,16 @@ export function MenuPage() {
         quantity: 1,
         page_path: window.location.pathname
       })
+
+      if(!firedStartOrder.current && totalItems === 0) {
+      firedStartOrder.current = true
+
+      pushDataLayerEvent("start_order", {
+        items_count: 1,
+        order_value: product.price,
+        page_path: window.location.pathname
+      })
+    }
     }
   }
     setSelectedProducts(newSelected)
@@ -124,6 +134,16 @@ export function MenuPage() {
       page_path: window.location.pathname
     })
 
+    if(!firedStartOrder.current && totalItems === 0) {
+      firedStartOrder.current = true
+
+      pushDataLayerEvent("start_order", {
+        items_count: 1,
+        order_value: product.price,
+        page_path: window.location.pathname
+      })
+    }
+
     setSelectedProducts(newSelected)
   }
 
@@ -157,6 +177,16 @@ export function MenuPage() {
       quantity: 1,
       page_path: window.location.pathname
     })
+
+    if(!firedStartOrder.current && totalItems === 0) {
+      firedStartOrder.current = true
+
+      pushDataLayerEvent("start_order", {
+        items_count: 1,
+        order_value: product.price,
+        page_path: window.location.pathname
+      })
+    }
 
     setSelectedProducts(newSelected)
   }
@@ -234,6 +264,7 @@ export function MenuPage() {
   }
 
   const firedScrollThresholds = useRef<Set<number>>(new Set())
+  const firedStartOrder = useRef(false)
 
 const SCROLL_THRESHOLDS = [25, 50, 75, 90]
 
@@ -405,7 +436,6 @@ useEffect(() => {
                                     
                                     const selected = selectedProducts.get(product.id) || (hasSinCafeVariant || hasSmoothieVariant ? {} as SelectedProduct : undefined)
                                     const isSelected = Boolean(selected && Object.keys(selected).length > 0)
-                                    const canSelect = !isSelected && totalItems < MAX_TOTAL_ITEMS
                                     
                                     // Si es SIN CAFÉ Y NO está seleccionado → mostrar botones de temperatura
                                     if (isSinCafe && !isSelected) {
