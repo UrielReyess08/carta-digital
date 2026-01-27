@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 import { type menuData, getCategoriesInOrder, getProductsByCategory, MenuItem } from "@/lib/menu-data"
-import { ShoppingCart, Check, Trash2, Coffee, Plus, Minus } from "lucide-react"
+import { ShoppingCart, Heart, Trash2, Coffee, Plus, Minus } from "lucide-react"
 import { generateWhatsAppMessage, getWhatsAppLink } from "@/lib/whatsapp-utils"
 
 
@@ -22,6 +22,7 @@ interface SelectedProduct {
 
 export function MenuPage() {
   const [selectedProducts, setSelectedProducts] = useState<Map<string, SelectedProduct>>(new Map())
+  const [likedProducts, setLikedProducts] = useState<Set<string>>(new Set())
 
   const categories = getCategoriesInOrder()
 
@@ -258,6 +259,16 @@ export function MenuPage() {
   window.location.href = whatsappUrl
 }
 
+  const handleToggleLike = (productId: string) => {
+    const newLiked = new Set(likedProducts)
+    if (newLiked.has(productId)) {
+      newLiked.delete(productId)
+    } else {
+      newLiked.add(productId)
+    }
+    setLikedProducts(newLiked)
+  }
+
   // Estado para controlar la categoría abierta (solo una a la vez)
   const [openCategory, setOpenCategory] = useState<string | null>(null)
 
@@ -406,7 +417,7 @@ useEffect(() => {
                             return (
                               <Card
                                 key={product.id}
-                                className={`p-4 transition-all border-2 flex flex-row items-start gap-3 ${
+                                className={`p-4 transition-all border-2 flex flex-row items-start gap-3 relative ${
                                   isSelected
                                     ? "border-primary bg-primary/5 shadow-md"
                                     : canSelect
@@ -415,6 +426,24 @@ useEffect(() => {
                                 }`}
                                 onClick={() => canSelect && handleSelectProduct(product)}
                               >
+
+                                <button
+                                  onClick={(e) =>{
+                                    e.stopPropagation()
+                                    handleToggleLike(product.id)
+                                  }}
+                                  className="absolute bottom-2 right-2 p-1.5 rounded-full bg-white/80 hover:bg-white shadow-md transition-all z-10"
+                                  aria-label={`Like ${product.name}`}
+                                >
+                                  <Heart 
+                                    className={`w-5 h-5 transition-colors ${
+                                      likedProducts.has(product.id)
+                                        ? "fill-red-500 text-red-500"
+                                        : "text-gray-400"
+                                    }`}
+                                  />
+                                </button>
+
                                 <div className="flex-1 flex flex-col justify-between">
                                   <div>
                                     <h4 className="font-semibold text-foreground">{product.name}</h4>
