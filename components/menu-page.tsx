@@ -345,7 +345,7 @@ useEffect(() => {
 
             <div className="flex items-center gap-2">
               <ShoppingCart className="w-6 h-6 text-primary" />
-              <Badge className="text-base px-3 py-1 bg-primary text-white">{totalItems} / 10</Badge>
+              <Badge className="text-base px-3 py-1 bg-primary text-white">{totalItems} / 12</Badge>
             </div>
           </div>
         </div>
