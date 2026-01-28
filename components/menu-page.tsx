@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
+import { MenuHeader } from "@/components/menu-header"
 import { type menuData, getCategoriesInOrder, getProductsByCategory, MenuItem } from "@/lib/menu-data"
 import { ShoppingCart, Heart, Trash2, Coffee, Plus, Minus } from "lucide-react"
 import { generateWhatsAppMessage, getWhatsAppLink } from "@/lib/whatsapp-utils"
@@ -339,28 +340,7 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-background">
-      <div className="sticky top-0 z-50 bg-white border-b-2 border-primary shadow-md">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <img
-                src="logo-el-vikingo-.png"
-                alt="El Vikingo Coffee Bike"
-                className="h-14 w-14 object-contain transform scale-290"
-              />
-              <div>
-                <h1 className="text-2xl font-bold text-primary">El Vikingo</h1>
-                <p className="text-sm text-muted-foreground">Coffee Bike Menú Digital</p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <ShoppingCart className="w-6 h-6 text-primary" />
-              <Badge className="text-base px-3 py-1 bg-primary text-white">{totalItems} / 12</Badge>
-            </div>
-          </div>
-        </div>
-      </div>
+      <MenuHeader totalItems={totalItems} />
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-4 py-8">
