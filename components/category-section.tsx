@@ -86,7 +86,7 @@ export const CategorySection = React.memo(({
               const isSelected = Boolean(selected && Object.keys(selected).length > 0)
               const canSelect = !isSelected && totalItems < maxTotalItems
               // Priority para primeras 2 imágenes de categorías primarias
-              const isPriorityImage = isPrimaryCategory && index < 2 && product.image
+              const isPriorityImage = !!(isPrimaryCategory && index < 2 && product.image)
 
               return (
                 <ProductCard
