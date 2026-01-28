@@ -1,4 +1,5 @@
 import React from "react"
+import Image from "next/image"
 import { Card } from "@/components/ui/card"
 import { Heart } from "lucide-react"
 import { MenuItem } from "@/lib/menu-data"
@@ -107,10 +108,15 @@ export const ProductCard = React.memo(({
 
       {/* Imagen a la DERECHA */}
       {product.image && (
-        <img
+        <Image 
           src={product.image}
           alt={product.name}
+          width={120}
+          height={120}
           className="w-30 h-30 object-cover rounded-lg flex-shrink-0"
+          loading="lazy"
+          placeholder="blur"
+          blurDataURL="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect fill='%23f0f0f0' width='120' height='120'/%3E%3C/svg%3E"
         />
       )}
     </Card>
