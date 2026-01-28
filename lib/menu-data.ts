@@ -10,12 +10,12 @@ export interface MenuItem {
 export const menuData: MenuItem[] = [
 
   // CAFÉ 7oz
-  { id: "cafe-vikingo-baileys-7", name: "Vikingo Baileys Coffee", price: 6.00, category: "CAFÉ 7oz", description: "Espresso + Baileys + crema" },
+  { id: "cafe-vikingo-baileys-7", name: "Vikingo Baileys Coffee", price: 6.00, category: "CAFÉ 7oz", description: "Espresso + Baileys + crema", image: "/VikingoBaileysCoffee.webp" },
   { id: "cafe-vikingo-bombom-7", name: "Vikingo Bom bóm", price: 5.00, category: "CAFÉ 7oz", description: "Espresso + Ron + crema" },
 
   // CAFÉ 10oz
-  { id: "cafe-americano-10", name: "Americano", price: 3.00, category: "CAFÉ 10oz",},
-  { id: "cafe-espresso-10", name: "Espresso", price: 3.00, category: "CAFÉ 10oz" },
+  { id: "cafe-americano-10", name: "Americano", price: 3.00, category: "CAFÉ 10oz", image: "/americano.webp"},
+  { id: "cafe-espresso-10", name: "Espresso", price: 3.00, category: "CAFÉ 10oz", image: "/Espresso.webp" },
   { id: "cafe-cappuccino-10", name: "Cappuccino", price: 4.00, category: "CAFÉ 10oz", image: "/Capuccino.webp"},
   { id: "cafe-mocaccino-10", name: "Mocaccino", price: 5.00, category: "CAFÉ 10oz", image: "/Mocaccino.webp"},
   { id: "cafe-winter-summer-10", name: "Winter / Summer Coffee", price: 4.00, category: "CAFÉ 10oz", description: "Americano + crema" },
@@ -25,16 +25,16 @@ export const menuData: MenuItem[] = [
   { id: "cafe-latte-12", name: "Coffee latte", price: 7.00, category: "CAFÉ 12oz", description: "Espresso + leche + crema" },
 
   // SIN CAFÉ 12oz
-  { id: "sincafe-choco-milk-12", name: "Choco milk", price: 7.00, category: "SIN CAFÉ 12oz", description: "Cacao + leche + crema" },
-  { id: "sincafe-choco-baileys-12", name: "Choco Baileys", price: 10.00, category: "SIN CAFÉ 12oz" },
-  { id: "sincafe-caramel-latte-12", name: "Caramel Latte", price: 7.00, category: "SIN CAFÉ 12oz" },
+  { id: "sincafe-choco-milk-12", name: "Choco milk", price: 7.00, category: "SIN CAFÉ 12oz", description: "Cacao + leche + crema", image: "/chocomilk.webp" },
+  { id: "sincafe-choco-baileys-12", name: "Choco Baileys", price: 10.00, category: "SIN CAFÉ 12oz", image: "/ChocoBAILEYS.webp" },
+  { id: "sincafe-caramel-latte-12", name: "Caramel Latte", price: 7.00, category: "SIN CAFÉ 12oz", image: "/CARAMEL LATTE.webp" },
   { id: "sincafe-baileys-latte-12", name: "Baileys Latte", price: 10.00, category: "SIN CAFÉ 12oz" },
   { id: "trago-lumumba-latte-12", name: "Trago Lumumba", price: 10.00, category: "SIN CAFÉ 12oz", image: "/TRAGO LUMUMBA.webp"},
 
   // FRAPPUCCINOS 12oz
-  { id: "frap-cafe-12", name: "Frappuccino Café", price: 9.00, category: "FRAPPUCCINOS 12oz" },
-  { id: "frap-caramel-12", name: "Frappuccino Caramel", price: 9.00, category: "FRAPPUCCINOS 12oz" },
-  { id: "frap-moca-12", name: "Frappuccino Moca", price: 9.00, category: "FRAPPUCCINOS 12oz" },
+  { id: "frap-cafe-12", name: "Frappuccino Café", price: 9.00, category: "FRAPPUCCINOS 12oz", image: "/FRAPUCCINO DE CAFE.webp" },
+  { id: "frap-caramel-12", name: "Frappuccino Caramel", price: 9.00, category: "FRAPPUCCINOS 12oz", image: "/frapuccino de caramel.webp" },
+  { id: "frap-moca-12", name: "Frappuccino Moca", price: 9.00, category: "FRAPPUCCINOS 12oz", image: "/frapuccino de moca.webp" },
   { id: "frap-matcha-12", name: "Frappuccino Matcha", price: 10.00, category: "FRAPPUCCINOS 12oz", image: "/FRAPPUCINO MATCHA.webp" },
 
   // SMOOTHIES 12oz
@@ -42,7 +42,7 @@ export const menuData: MenuItem[] = [
   { id: "smooth-lucuma-12", name: "Smoothie Lúcuma", price: 9.00, category: "SMOOTHIES 12oz", image: "/SMOOTHIES DE LUCUMA.webp"},
   { id: "smooth-mango-12", name: "Smoothie Mango", price: 9.00, category: "SMOOTHIES 12oz", image: "/SMOOTHIES DE MANGO.webp"},
   { id: "smooth-arandano-12", name: "Smoothie Arándano", price: 9.00, category: "SMOOTHIES 12oz", image: "/SMOOTHIES DE ARANDANO.webp"},
-  { id: "smooth-frambuesa-12", name: "Smoothie Frambuesa", price: 11.00, category: "SMOOTHIES 12oz" },
+  { id: "smooth-frambuesa-12", name: "Smoothie Frambuesa", price: 11.00, category: "SMOOTHIES 12oz", image: "/smothiedeframbuesa.webp" },
 
   // FROZEN 12oz
   { id: "frozen-fresa-12", name: "Frozen Fresa", price: 8.00, category: "FROZEN 12oz", image: "/FROZEN DE FRESA.webp" },
