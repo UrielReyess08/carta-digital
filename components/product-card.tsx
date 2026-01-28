@@ -21,6 +21,7 @@ interface ProductCardProps {
   likedProducts: Set<string>
   totalItems: number
   maxTotalItems: number
+  isPriorityImage?: boolean
   getProductKey: (productId: string, milkType?: string, temperature?: string) => string
   onSelectProduct: (product: MenuItem) => void
   onAddWithTemperature: (product: MenuItem, temperature: "Frío" | "Caliente") => void
@@ -37,6 +38,7 @@ export const ProductCard = React.memo(({
   likedProducts,
   totalItems,
   maxTotalItems,
+  isPriorityImage = false,
   getProductKey,
   onSelectProduct,
   onAddWithTemperature,
@@ -114,7 +116,8 @@ export const ProductCard = React.memo(({
           width={120}
           height={120}
           className="w-30 h-30 object-cover rounded-lg flex-shrink-0"
-          loading="lazy"
+          priority={isPriorityImage}
+          loading={isPriorityImage ? "eager" : "lazy"}
           placeholder="blur"
           blurDataURL="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect fill='%23f0f0f0' width='120' height='120'/%3E%3C/svg%3E"
         />

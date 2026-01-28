@@ -18,6 +18,7 @@ interface CategorySectionProps {
   category: string
   products: MenuItem[]
   isOpen: boolean
+  isPrimaryCategory?: boolean
   selectedProducts: Map<string, SelectedProduct>
   likedProducts: Set<string>
   totalItems: number
@@ -37,6 +38,7 @@ export const CategorySection = React.memo(({
   category,
   products,
   isOpen,
+  isPrimaryCategory = false,
   selectedProducts,
   likedProducts,
   totalItems,
@@ -72,7 +74,7 @@ export const CategorySection = React.memo(({
       {isOpen && (
         <div className="px-6 py-4 bg-white">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {products.map((product) => {
+            {products.map((product, index) => {
               const isSmootie = product.category.includes("SMOOTHIES")
               // Para smoothies, check si existe cualquier variante (Lactosa o Deslactosada)
               // Para otros productos, check el id simple
@@ -83,6 +85,8 @@ export const CategorySection = React.memo(({
               const selected = selectedProducts.get(product.id) || (hasAnyVariant ? {} as SelectedProduct : undefined)
               const isSelected = Boolean(selected && Object.keys(selected).length > 0)
               const canSelect = !isSelected && totalItems < maxTotalItems
+              // Priority para primeras 2 imágenes de categorías primarias
+              const isPriorityImage = isPrimaryCategory && index < 2 && product.image
 
               return (
                 <ProductCard
@@ -93,6 +97,7 @@ export const CategorySection = React.memo(({
                   totalItems={totalItems}
                   maxTotalItems={maxTotalItems}
                   getProductKey={getProductKey}
+                  isPriorityImage={isPriorityImage}
                   onSelectProduct={onSelectProduct}
                   onAddWithTemperature={onAddWithTemperature}
                   onAddWithMilkType={onAddWithMilkType}

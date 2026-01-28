@@ -1,339 +1,158 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { MenuHeader } from "@/components/menu-header"
 import { OrderSidebar } from "@/components/order-sidebar"
 import { CategorySection } from "@/components/category-section"
-import { type menuData, getCategoriesInOrder, getProductsByCategory, MenuItem } from "@/lib/menu-data"
+import { getCategoriesInOrder, getProductsByCategory } from "@/lib/menu-data"
 import { generateWhatsAppMessage, getWhatsAppLink } from "@/lib/whatsapp-utils"
+import { useCart } from "@/hooks/useCart"
+import { useAnalytics } from "@/hooks/useAnalytics"
+import { MAX_TOTAL_ITEMS, SCROLL_THRESHOLDS } from "@/lib/constants"
 
-
-interface SelectedProduct {
-  id: string
-  name: string
-  price: number
-  quantity: number
-  category?: string
-  milkType?: "Lactosa" | "Deslactosada"
-  temperature?: "Frío" | "Caliente"
+// Helper puro para generar claves de producto
+const getProductKey = (productId: string, milkType?: string, temperature?: string): string => {
+  let key = productId
+  if (milkType) key += `-${milkType.toLowerCase()}`
+  if (temperature) key += `-${temperature.toLowerCase()}`
+  return key
 }
 
 export function MenuPage() {
-  const [selectedProducts, setSelectedProducts] = useState<Map<string, SelectedProduct>>(new Map())
-  const [likedProducts, setLikedProducts] = useState<Set<string>>(new Set())
+  const [openCategory, setOpenCategory] = useState<string | null>(null)
 
   const categories = getCategoriesInOrder()
 
-  // Generar clave única: id + milkType + temperature
-  const getProductKey = (productId: string, milkType?: string, temperature?: string): string => {
-    let key = productId
-    if (milkType) key += `-${milkType.toLowerCase()}`
-    if (temperature) key += `-${temperature.toLowerCase()}`
-    return key
-  }
+  // Usar custom hooks
+  const {
+    selectedProducts,
+    likedProducts,
+    totalItems,
+    totalPrice,
+    firedStartOrder,
+    selectProduct,
+    addWithMilkType,
+    addWithTemperature,
+    removeProduct,
+    increaseQuantity,
+    decreaseQuantity,
+    clearSelection,
+    toggleLike,
+  } = useCart()
 
-  // Límite total de unidades por pedido
-  const MAX_TOTAL_ITEMS = 12
+  const {
+    pushDataLayerEvent,
+    trackAddProduct,
+    trackStartOrder,
+    trackSendOrderWhatsApp,
+    trackViewCategory,
+    trackScroll,
+  } = useAnalytics()
 
-  // totalItems ahora suma las cantidades (no productos distintos)
-  const totalItems = Array.from(selectedProducts.values()).reduce((sum, item) => sum + item.quantity, 0)
-  const totalPrice = Array.from(selectedProducts.values()).reduce((sum, item) => sum + item.price * item.quantity, 0)
-
-  // Seleccionar / agregar (si ya seleccionado incrementa cantidad hasta el máximo)
-  const handleSelectProduct = (product: (typeof menuData)[0]) => {
-    // Si es SIN CAFÉ o smoothie Y NO está seleccionado, no hacer nada (el usuario debe elegir opciones)
-    const isSinCafe = product.category.includes("SIN CAFÉ")
-    const isSmootie = product.category.includes("SMOOTHIES")
-    const alreadySelected = selectedProducts.has(product.id)
-    if ((isSinCafe || isSmootie) && !alreadySelected) {
-      return
-    }
-
-    const newSelected = new Map(selectedProducts)
-    const currentTotal = Array.from(newSelected.values()).reduce((s, it) => s + it.quantity, 0)
-
-    const key = getProductKey(product.id)
-    if (newSelected.has(key)) {
-      const existing = newSelected.get(key)!
-      if (currentTotal < MAX_TOTAL_ITEMS) {
-        newSelected.set(key, { ...existing, quantity: existing.quantity + 1 })
-
-        pushDataLayerEvent("add_product", {
-        product_name: product.name,
-        product_category: product.category,
-        product_variant: "default", // POR DEFECTO NO CAMBIARA NADA
-        price: product.price,
-        quantity: 1,
-        page_path: window.location.pathname
+  // Wrappear handlers del carrito con tracking analytics
+  const handleSelectProduct = useCallback((product: any) => {
+    selectProduct(product, (prod: any) => {
+      trackAddProduct(prod)
+    }, (items: number, value: number) => {
+      trackStartOrder(items, value)
     })
-  }
-    } else {
-      if (currentTotal < MAX_TOTAL_ITEMS) {
-        newSelected.set(key, {
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          quantity: 1,
-          category: product.category,
-        })
+  }, [selectProduct, trackAddProduct, trackStartOrder])
 
-        pushDataLayerEvent("add_product", {
-        product_name: product.name,
-        product_category: product.category,
-        product_variant: "default", // POR DEFECTO NO CAMBIARA NADA
-        price: product.price,
-        quantity: 1,
-        page_path: window.location.pathname
+  const handleAddWithMilkType = useCallback(
+    (product: any, milkType: "Lactosa" | "Deslactosada") => {
+      addWithMilkType(product, milkType, (prod: any) => {
+        trackAddProduct(prod)
+      }, (items: number, value: number) => {
+        trackStartOrder(items, value)
       })
+    },
+    [addWithMilkType, trackAddProduct, trackStartOrder]
+  )
 
-      if(!firedStartOrder.current && totalItems === 0) {
-      firedStartOrder.current = true
-
-      pushDataLayerEvent("start_order", {
-        items_count: 1,
-        order_value: product.price,
-        page_path: window.location.pathname
+  const handleAddWithTemperature = useCallback(
+    (product: any, temperature: "Frío" | "Caliente") => {
+      addWithTemperature(product, temperature, (prod: any) => {
+        trackAddProduct(prod)
+      }, (items: number, value: number) => {
+        trackStartOrder(items, value)
       })
-    }
-    }
-  }
-    setSelectedProducts(newSelected)
-  }
+    },
+    [addWithTemperature, trackAddProduct, trackStartOrder]
+  )
 
-  const handleAddWithMilkType = (product: MenuItem, milkType: "Lactosa" | "Deslactosada") => {
-    const newSelected = new Map(selectedProducts)
-    const currentTotal = Array.from(newSelected.values()).reduce((s, it) => s + it.quantity, 0)
-
-    if (currentTotal >= MAX_TOTAL_ITEMS) return
-
-    const key = getProductKey(product.id, milkType)
-    const existing = newSelected.get(key)
-
-    if (existing) {
-      // Si ya existe esa variante, incrementa la cantidad
-      newSelected.set(key, { ...existing, quantity: existing.quantity + 1 })
-    } else {
-      // Si no existe, crea una nueva entrada
-      newSelected.set(key, {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: 1,
-        milkType: milkType,
-        category: product.category
+  const handleIncreaseQuantity = useCallback(
+    (key: string) => {
+      increaseQuantity(key, (prod: any) => {
+        trackAddProduct(prod)
       })
-    }
+    },
+    [increaseQuantity, trackAddProduct]
+  )
 
-    pushDataLayerEvent("add_product", {
-      product_name: product.name,
-      product_category: product.category,
-      product_variant: milkType, //TIPO DE LECHE
-      price: product.price,
-      quantity: 1,
-      page_path: window.location.pathname
-    })
+  const handleSendToWhatsApp = useCallback(() => {
+    if (selectedProducts.size === 0) return
+    const items = Array.from(selectedProducts.values()).map((item) => ({
+      name: item.name,
+      price: item.price,
+      quantity: item.quantity ?? 1,
+      milkType: item.milkType,
+      temperature: item.temperature,
+    }))
 
-    if(!firedStartOrder.current && totalItems === 0) {
-      firedStartOrder.current = true
+    const message = generateWhatsAppMessage(items, totalPrice)
+    const whatsappUrl = getWhatsAppLink(message)
 
-      pushDataLayerEvent("start_order", {
-        items_count: 1,
-        order_value: product.price,
-        page_path: window.location.pathname
-      })
-    }
+    trackSendOrderWhatsApp(totalItems, totalPrice)
 
-    setSelectedProducts(newSelected)
-  }
-
-  const handleAddWithTemperature = (product: MenuItem, temperature: "Frío" | "Caliente") => {
-    const newSelected = new Map(selectedProducts)
-    const currentTotal = Array.from(newSelected.values()).reduce((s, it) => s + it.quantity, 0)
-
-    if (currentTotal >= MAX_TOTAL_ITEMS) return
-
-    const key = getProductKey(product.id, undefined, temperature)
-    const existing = newSelected.get(key)
-
-    if (existing) {
-      newSelected.set(key, { ...existing, quantity: existing.quantity + 1 })
-    } else {
-      newSelected.set(key, {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        quantity: 1,
-        temperature: temperature,
-        category: product.category,
-      })
-    }
-
-    pushDataLayerEvent("add_product", {
-      product_name: product.name,
-      product_category: product.category,
-      product_variant: temperature, //TEMPERATURA
-      price: product.price,
-      quantity: 1,
-      page_path: window.location.pathname
-    })
-
-    if(!firedStartOrder.current && totalItems === 0) {
-      firedStartOrder.current = true
-
-      pushDataLayerEvent("start_order", {
-        items_count: 1,
-        order_value: product.price,
-        page_path: window.location.pathname
-      })
-    }
-
-    setSelectedProducts(newSelected)
-  }
-
-  const handleClearSelection = () => {
-    firedStartOrder.current = false //Reseta el flag para no volver a disparar
-    setSelectedProducts(new Map())
-  }
-
-  const handleRemoveProduct = (key: string) => {
-    const newSelected = new Map(selectedProducts)
-    newSelected.delete(key)
-    setSelectedProducts(newSelected)
-  }
-
-  const handleIncreaseQuantity = (key: string) => {
-    const newSelected = new Map(selectedProducts)
-    const currentTotal = Array.from(newSelected.values()).reduce((s, it) => s + it.quantity, 0)
-
-    if (currentTotal >= MAX_TOTAL_ITEMS) return
-
-    const existing = newSelected.get(key)
-    if (!existing) return
-    newSelected.set(key, { ...existing, quantity: existing.quantity + 1 })
-
-    pushDataLayerEvent("add_product", {
-      product_name: existing.name,
-      product_category: existing.category || "unknown",
-      product_variant: existing.milkType || existing.temperature || "default", 
-      price: existing.price,
-      quantity: 1,
-      page_path: window.location.pathname
-    })
-
-    setSelectedProducts(newSelected)
-  }
-
-  const handleDecreaseQuantity = (key: string) => {
-    const newSelected = new Map(selectedProducts)
-    const existing = newSelected.get(key)
-    if (!existing) return
-    if (existing.quantity <= 1) {
-      newSelected.delete(key)
-    } else {
-      newSelected.set(key, { ...existing, quantity: existing.quantity - 1 })
-    }
-    setSelectedProducts(newSelected)
-  }
-
-  const handleSendToWhatsApp = () => {
-  if (selectedProducts.size === 0) return
-  const items = Array.from(selectedProducts.values()).map((item) => ({
-    name: item.name,
-    price: item.price,
-    quantity: item.quantity ?? 1,
-    milkType: item.milkType,
-    temperature: item.temperature
-  }))
-
-  const message = generateWhatsAppMessage(items, totalPrice)
-  const whatsappUrl = getWhatsAppLink(message)
-
-  pushDataLayerEvent("send_order_whatsapp", {
-    items_count: totalItems,
-    order_value: Number(totalPrice.toFixed(2)),
-    page_path: window.location.pathname
-  })
-
-  window.location.href = whatsappUrl
-}
-
-  const handleToggleLike = (productId: string) => {
-    const newLiked = new Set(likedProducts)
-    if (newLiked.has(productId)) {
-      newLiked.delete(productId)
-    } else {
-      newLiked.add(productId)
-    }
-    setLikedProducts(newLiked)
-  }
-
-  // Estado para controlar la categoría abierta (solo una a la vez)
-  const [openCategory, setOpenCategory] = useState<string | null>(null)
-
-  const pushDataLayerEvent = (eventName: string, params: Record<string, any>) => {
-    if (typeof window === "undefined") return
-    ;(window as any).dataLayer = (window as any).dataLayer || []
-    ;(window as any).dataLayer.push({
-      event: eventName,
-      ...params,
-    })
-  }
+    window.location.href = whatsappUrl
+  }, [selectedProducts, totalPrice, totalItems, trackSendOrderWhatsApp])
 
   const firedScrollThresholds = useRef<Set<number>>(new Set())
-  const firedStartOrder = useRef(false)
 
-const SCROLL_THRESHOLDS = [25, 50, 75, 90]
+  useEffect(() => {
+    const onScroll = () => {
+      const doc = document.documentElement
+      const scrollTop = window.scrollY || doc.scrollTop
+      const scrollHeight = doc.scrollHeight - window.innerHeight
+      if (scrollHeight <= 0) return
 
-useEffect(() => {
-  const onScroll = () => {
-    const doc = document.documentElement
+      const percent = Math.round((scrollTop / scrollHeight) * 100)
 
-    const scrollTop = window.scrollY || doc.scrollTop
-
-    const scrollHeight = doc.scrollHeight - window.innerHeight
-    if (scrollHeight <= 0) return
-
-    const percent = Math.round((scrollTop / scrollHeight) * 100)
-
-    for (const threshold of SCROLL_THRESHOLDS) {
-      if (percent >= threshold && !firedScrollThresholds.current.has(threshold)) {
-        firedScrollThresholds.current.add(threshold)
-
-        pushDataLayerEvent("scroll_menu", {
-          scroll_percent: threshold,       
-          scroll_current: percent,      
-          page_path: window.location.pathname,
-        })
+      for (const threshold of SCROLL_THRESHOLDS) {
+        if (
+          percent >= threshold &&
+          !firedScrollThresholds.current.has(threshold)
+        ) {
+          firedScrollThresholds.current.add(threshold)
+          trackScroll(threshold, percent)
+        }
       }
     }
-  }
 
-  window.addEventListener("scroll", onScroll, { passive: true })
-  onScroll()
+    window.addEventListener("scroll", onScroll, { passive: true })
+    onScroll()
 
-  return () => window.removeEventListener("scroll", onScroll)
-}, [])
+    return () => window.removeEventListener("scroll", onScroll)
+  }, [trackScroll])
 
-  const toggleCategory = (category: string) => {
-    setOpenCategory((prev) => {
-      const willOpen = prev !== category
-      const next = willOpen ? category : null
+  const toggleCategory = useCallback(
+    (category: string) => {
+      setOpenCategory((prev) => {
+        const willOpen = prev !== category
+        const next = willOpen ? category : null
 
-      if (willOpen) {
-        const products = getProductsByCategory(category)
-        const categoryIndex = Math.max(1, categories.indexOf(category) + 1)
+        if (willOpen) {
+          const products = getProductsByCategory(category)
+          const categoryIndex = Math.max(1, categories.indexOf(category) + 1)
+          trackViewCategory(category, categoryIndex, products.length)
+        }
 
-        pushDataLayerEvent("view_category", {
-          category_name: category,
-          category_index: categoryIndex,
-          items_count: products.length,
-        })
-      }
-
-      return next
-    })
-  }
+        return next
+      })
+    },
+    [categories, trackViewCategory]
+  )
 
 
   return (
@@ -357,9 +176,11 @@ useEffect(() => {
             </div>
 
             <div className="space-y-4">
-              {categories.map((category) => {
+              {categories.map((category, index) => {
                 const products = getProductsByCategory(category)
                 const isOpen = openCategory === category
+                // Las primeras 2 categorías (CAFÉ 7oz, CAFÉ 10oz) son primarias
+                const isPrimaryCategory = index < 2
 
                 return (
                   <CategorySection
@@ -367,6 +188,7 @@ useEffect(() => {
                     category={category}
                     products={products}
                     isOpen={isOpen}
+                    isPrimaryCategory={isPrimaryCategory}
                     selectedProducts={selectedProducts}
                     likedProducts={likedProducts}
                     totalItems={totalItems}
@@ -377,8 +199,8 @@ useEffect(() => {
                     onAddWithTemperature={handleAddWithTemperature}
                     onAddWithMilkType={handleAddWithMilkType}
                     onIncreaseQuantity={handleIncreaseQuantity}
-                    onDecreaseQuantity={handleDecreaseQuantity}
-                    onToggleLike={handleToggleLike}
+                    onDecreaseQuantity={decreaseQuantity}
+                    onToggleLike={toggleLike}
                     onPushEvent={pushDataLayerEvent}
                   />
                 )
@@ -391,10 +213,10 @@ useEffect(() => {
               selectedProducts={selectedProducts}
               totalPrice={totalPrice}
               onIncreaseQuantity={handleIncreaseQuantity}
-              onDecreaseQuantity={handleDecreaseQuantity}
-              onRemoveProduct={handleRemoveProduct}
+              onDecreaseQuantity={decreaseQuantity}
+              onRemoveProduct={removeProduct}
               onSendToWhatsApp={handleSendToWhatsApp}
-              onClearSelection={handleClearSelection}
+              onClearSelection={clearSelection}
               onPushEvent={pushDataLayerEvent}
             />
           </div>
