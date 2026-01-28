@@ -64,7 +64,7 @@ export const menuData: MenuItem[] = [
   // ADICIONALES
   { id: "adic-shot-baileys", name: "Shot de Baileys", price: 3.00, category: "ADICIONALES", image: "/Shot de Baileys.webp" },
   { id: "adic-shot-ron", name: "Shot de Ron", price: 2.00, category: "ADICIONALES", image: "/Shot de Ron.webp" },
-  { id: "adic-crema", name: "Crema", price: 2.00, category: "ADICIONALES", image: "/crema.webp" },
+  { id: "adic-crema", name: "Crema", price: 2.00, category: "ADICIONALES", image: "/Crema.webp" },
 ]
 
 export const getCategoriesInOrder = (): string[] => {
