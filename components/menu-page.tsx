@@ -1,13 +1,11 @@
 "use client"
 
-import { use, useEffect, useRef, useState } from "react"
-import { Card } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { ScrollArea } from "@/components/ui/scroll-area"
+import { useEffect, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { MenuHeader } from "@/components/menu-header"
+import { OrderSidebar } from "@/components/order-sidebar"
+import { CategorySection } from "@/components/category-section"
 import { type menuData, getCategoriesInOrder, getProductsByCategory, MenuItem } from "@/lib/menu-data"
-import { ShoppingCart, Heart, Trash2, Coffee, Plus, Minus } from "lucide-react"
 import { generateWhatsAppMessage, getWhatsAppLink } from "@/lib/whatsapp-utils"
 
 
@@ -364,288 +362,41 @@ useEffect(() => {
                 const isOpen = openCategory === category
 
                 return (
-                  <div key={category} className="border rounded-md overflow-hidden">
-                    <button
-                      type="button"
-                      onClick={() => toggleCategory(category)}
-                      className="w-full text-left px-6 py-3 bg-yellow-300/80 hover:bg-yellow-300 font-bold flex items-center justify-between"
-                      aria-expanded={isOpen}
-                    >
-                      <div className="flex items-center gap-3">
-                        <Coffee className="w-5 h-5 text-primary" />
-                        <span>{category}</span>
-                        <Badge variant="secondary" className="ml-2">{products.length}</Badge>
-                      </div>
-                      <span className="text-sm">{isOpen ? "−" : "+"}</span>
-                    </button>
-
-                    {isOpen && (
-                      <div className="px-6 py-4 bg-white">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {products.map((product) => {
-                            const isSmootie = product.category.includes("SMOOTHIES")
-                            // Para smoothies, check si existe cualquier variante (Lactosa o Deslactosada)
-                            // Para otros productos, check el id simple
-                            const hasAnyVariant = isSmootie && (
-                              selectedProducts.has(getProductKey(product.id, "Lactosa")) ||
-                              selectedProducts.has(getProductKey(product.id, "Deslactosada"))
-                            )
-                            const selected = selectedProducts.get(product.id) || (hasAnyVariant ? {} as SelectedProduct : undefined)
-                            const isSelected = Boolean(selected && Object.keys(selected).length > 0)
-                            const canSelect = !isSelected && totalItems < MAX_TOTAL_ITEMS
-
-                            return (
-                              <Card
-                                key={product.id}
-                                className={`p-4 transition-all border-2 flex flex-row items-start gap-3 relative ${
-                                  isSelected
-                                    ? "border-primary bg-primary/5 shadow-md"
-                                    : canSelect
-                                      ? "border-border hover:border-primary hover:shadow-md hover:bg-card cursor-pointer"
-                                      : "border-border opacity-40 cursor-not-allowed"
-                                }`}
-                                onClick={() => canSelect && handleSelectProduct(product)}
-                              >
-
-                                <button
-                                  onClick={(e) =>{
-                                    e.stopPropagation()
-                                    handleToggleLike(product.id)
-                                  }}
-                                  className="absolute bottom-2 right-2 p-1.5 rounded-full bg-white/80 hover:bg-white shadow-md transition-all z-10"
-                                  aria-label={`Like ${product.name}`}
-                                >
-                                  <Heart 
-                                    className={`w-5 h-5 transition-colors ${
-                                      likedProducts.has(product.id)
-                                        ? "fill-red-500 text-red-500"
-                                        : "text-gray-400"
-                                    }`}
-                                  />
-                                </button>
-
-                                <div className="flex-1 flex flex-col justify-between">
-                                  <div>
-                                    <h4 className="font-semibold text-foreground">{product.name}</h4>
-                                    <p className="text-2xl font-bold text-primary">S/.{product.price.toFixed(2)}</p>
-                                    {product.description && (
-                                      <p className="text-xs text-muted-foreground mt-2 italic">{product.description}</p>
-                                    )}
-                                  </div>
-
-                                  <div className="mt-3">
-                                  {(() => {
-                                    const isSinCafe = product.category.includes("SIN CAFÉ")
-                                    const isSmootie = product.category.includes("SMOOTHIES")
-                                    
-                                    // Para SIN CAFÉ, check si existe cualquier variante
-                                    const hasSinCafeVariant = isSinCafe && (
-                                      selectedProducts.has(getProductKey(product.id, undefined, "Frío")) ||
-                                      selectedProducts.has(getProductKey(product.id, undefined, "Caliente"))
-                                    )
-                                    
-                                    // Para smoothies, check si existe cualquier variante
-                                    const hasSmoothieVariant = isSmootie && (
-                                      selectedProducts.has(getProductKey(product.id, "Lactosa")) ||
-                                      selectedProducts.has(getProductKey(product.id, "Deslactosada"))
-                                    )
-                                    
-                                    const selected = selectedProducts.get(product.id) || (hasSinCafeVariant || hasSmoothieVariant ? {} as SelectedProduct : undefined)
-                                    const isSelected = Boolean(selected && Object.keys(selected).length > 0)
-                                    
-                                    // Si es SIN CAFÉ Y NO está seleccionado → mostrar botones de temperatura
-                                    if (isSinCafe && !isSelected) {
-                                      return (
-                                        <div className="flex flex-col gap-2">
-                                          <button 
-                                            onClick={(e) => {
-                                              e.stopPropagation()
-                                              handleAddWithTemperature(product, "Frío")
-                                            }}
-                                            className="w-[120px] h-8 px-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-semibold transition-colors"
-                                          >
-                                              Frío
-                                          </button>
-                                          <button 
-                                            onClick={(e) => {
-                                              e.stopPropagation()
-                                              handleAddWithTemperature(product, "Caliente")
-                                            }}
-                                            className="w-[120px] h-8 px-2 bg-red-100 hover:bg-red-200 rounded text-sm font-semibold transition-colors"
-                                          >
-                                              Caliente
-                                          </button>
-                                        </div>
-                                      )
-                                    }
-                                    
-                                    // Si es smoothie Y NO está seleccionado → mostrar botones de leche
-                                    if (isSmootie && !isSelected) {
-                                      return (
-                                        <div className="flex flex-col gap-2">
-                                          <button 
-                                            onClick={(e) => {
-                                              e.stopPropagation()
-                                              handleAddWithMilkType(product, "Lactosa")
-                                            }}
-                                            className="w-[120px] h-8 px-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-semibold transition-colors"
-                                          >
-                                             Lactosa
-                                          </button>
-                                          <button 
-                                            onClick={(e) => {
-                                              e.stopPropagation()
-                                              handleAddWithMilkType(product, "Deslactosada")
-                                            }}
-                                            className="w-[120px] h-8 px-2 bg-green-100 hover:bg-green-200 rounded text-sm font-semibold transition-colors"
-                                          >
-                                             Deslactosada
-                                          </button>
-                                        </div>
-                                      )
-                                    }
-                                    
-                                    // Si YA está seleccionado → mostrar controles +/-
-                                    if (isSelected) {
-                                      return (
-                                        <div className="flex items-center justify-between">
-                                          <div className="flex items-center gap-2">
-                                            <button
-                                              onClick={(e) => { e.stopPropagation(); handleDecreaseQuantity(getProductKey(product.id, selected!.milkType, selected!.temperature)) }}
-                                              className="p-1 rounded bg-gray-100 hover:bg-gray-200"
-                                              aria-label={`Disminuir cantidad ${product.name}`}
-                                            >
-                                              <Minus className="w-4 h-4" />
-                                            </button>
-                                            <span className="font-semibold">{selected!.quantity}</span>
-                                            <button
-                                              onClick={(e) => { e.stopPropagation(); handleIncreaseQuantity(getProductKey(product.id, selected!.milkType, selected!.temperature)) }}
-                                              className="p-1 rounded bg-gray-100 hover:bg-gray-200"
-                                              aria-label={`Aumentar cantidad ${product.name}`}
-                                            >
-                                              <Plus className="w-4 h-4" />
-                                            </button>
-                                          </div>
-                                          <div className="text-sm text-muted-foreground">
-                                            S/.{(product.price * selected!.quantity).toFixed(2)}
-                                          </div>
-                                        </div>
-                                      )
-                                    }
-                                    
-                                    // Si NO es smoothie Y NO está seleccionado → mensaje "Toca para agregar"
-                                    return <span className="text-sm text-muted-foreground">Toca para agregar</span>
-                                  })()}
-                                  </div>
-                                </div>
-
-                                {/* Imagen a la DERECHA */}
-                                {product.image && (
-                                  <img
-                                    src={product.image}
-                                    alt={product.name}
-                                    className="w-30 h-30 object-cover rounded-lg flex-shrink-0"
-                                  />
-                                )}
-                              </Card>
-                            )
-                          })}
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <CategorySection
+                    key={category}
+                    category={category}
+                    products={products}
+                    isOpen={isOpen}
+                    selectedProducts={selectedProducts}
+                    likedProducts={likedProducts}
+                    totalItems={totalItems}
+                    maxTotalItems={MAX_TOTAL_ITEMS}
+                    getProductKey={getProductKey}
+                    onToggleCategory={toggleCategory}
+                    onSelectProduct={handleSelectProduct}
+                    onAddWithTemperature={handleAddWithTemperature}
+                    onAddWithMilkType={handleAddWithMilkType}
+                    onIncreaseQuantity={handleIncreaseQuantity}
+                    onDecreaseQuantity={handleDecreaseQuantity}
+                    onToggleLike={handleToggleLike}
+                    onPushEvent={pushDataLayerEvent}
+                  />
                 )
               })}
             </div>
           </div>
 
           <div className="lg:col-span-1">
-            <Card className="p-6 sticky top-24 border-2 border-primary bg-white shadow-lg">
-              <h3 className="text-xl font-bold mb-4 text-primary flex items-center gap-2">
-                <ShoppingCart className="w-5 h-5" />
-                Tu Pedido
-              </h3>
-
-              <ScrollArea className="h-64 mb-6 pr-4">
-                <div className="space-y-3">
-                  {selectedProducts.size === 0 ? (
-                    <div className="text-center py-8">
-                      <p className="text-muted-foreground text-sm">Selecciona productos para comenzar</p>
-                    </div>
-                  ) : (
-                    Array.from(selectedProducts.entries()).map(([key, item]) => (
-                      <div key={key} className="flex justify-between items-center border-b border-border pb-3">
-                        <div className="flex-1">
-                          <p className="font-medium text-sm text-foreground">{item.name}</p>
-                          {(item.temperature || item.milkType) && (
-                            <p className="text-xs text-muted-foreground">
-                              {item.temperature && <span>{item.temperature}</span>}
-                              {item.temperature && item.milkType && <span> • </span>}
-                              {item.milkType && <span>Leche: {item.milkType}</span>}
-                            </p>
-                          )}
-                          <p className="text-sm font-bold text-primary">S/.{(item.price * item.quantity).toFixed(2)}</p>
-
-                          <div className="flex items-center gap-2 mt-2">
-                            <button
-                              onClick={() => handleDecreaseQuantity(key)}
-                              className="p-1 rounded bg-gray-100 hover:bg-gray-200"
-                              aria-label={`Disminuir cantidad ${item.name}`}
-                            >
-                              <Minus className="w-4 h-4" />
-                            </button>
-
-                            <span className="font-semibold">{item.quantity}</span>
-
-                            <button
-                              onClick={() => handleIncreaseQuantity(key)}
-                              className="p-1 rounded bg-gray-100 hover:bg-gray-200"
-                              aria-label={`Aumentar cantidad ${item.name}`}
-                            >
-                              <Plus className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => handleRemoveProduct(key)}
-                          className="ml-2 text-red-500 hover:text-red-700 transition-colors p-1"
-                          title="Eliminar del pedido"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </ScrollArea>
-
-              {selectedProducts.size > 0 && (
-                <>
-                  <div className="border-t-2 border-primary pt-4 mb-4">
-                    <div className="flex justify-between items-center">
-                      <span className="font-semibold text-foreground">Total:</span>
-                      <span className="text-3xl font-bold text-primary">S/.{totalPrice.toFixed(2)}</span>
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={handleSendToWhatsApp}
-                    className="w-full mb-3 bg-green-500 hover:bg-green-600 text-white font-bold py-3 text-base transition-all shadow-md"
-                  >
-                    Enviar a WhatsApp
-                  </Button>
-
-                  <Button
-                    onClick={handleClearSelection}
-                    variant="outline"
-                    className="w-full border-primary text-primary hover:bg-primary/10 bg-transparent"
-                  >
-                    Limpiar Pedido
-                  </Button>
-                </>
-              )}
-            </Card>
+            <OrderSidebar
+              selectedProducts={selectedProducts}
+              totalPrice={totalPrice}
+              onIncreaseQuantity={handleIncreaseQuantity}
+              onDecreaseQuantity={handleDecreaseQuantity}
+              onRemoveProduct={handleRemoveProduct}
+              onSendToWhatsApp={handleSendToWhatsApp}
+              onClearSelection={handleClearSelection}
+              onPushEvent={pushDataLayerEvent}
+            />
           </div>
         </div>
       </div>
