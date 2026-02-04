@@ -15,12 +15,12 @@ export const CategoryFilter = React.memo(({
   onSelectCategory,
 }: CategoryFilterProps) => {
   return (
-    <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm border-b border-border py-3 -mx-4 px-4">
+    <div className="sticky top-20 z-30 bg-background/95 backdrop-blur-sm border-b border-border py-4 -mx-4 px-4 mt-2">
       <div className="overflow-x-auto scrollbar-hide">
-        <div className="flex gap-2 pb-1">
+        <div className="flex gap-3 pb-1">
           <button
             onClick={() => onSelectCategory(null)}
-            className={`inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-all ${
+            className={`inline-flex items-center justify-center rounded-full px-6 py-3 text-base font-semibold transition-all ${
               selectedCategory === null
                 ? "bg-primary text-primary-foreground shadow-md scale-105"
                 : "bg-secondary text-secondary-foreground hover:bg-secondary/80"
@@ -32,7 +32,7 @@ export const CategoryFilter = React.memo(({
             <button
               key={category}
               onClick={() => onSelectCategory(category)}
-              className={`inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-all whitespace-nowrap ${
+              className={`inline-flex items-center justify-center rounded-full px-6 py-3 text-base font-semibold transition-all whitespace-nowrap ${
                 selectedCategory === category
                   ? "bg-primary text-primary-foreground shadow-md scale-105"
                   : "bg-secondary text-secondary-foreground hover:bg-secondary/80"

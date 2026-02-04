@@ -52,13 +52,13 @@ export const ProductActionButtons = React.memo(({
   // Si es SIN CAFÉ Y NO está seleccionado → mostrar botones de temperatura
   if (isSinCafe && !isSelected) {
     return (
-      <div className="flex gap-2 w-full">
+      <div className="flex flex-col gap-2 w-full">
         <button
           onClick={(e) => {
             e.stopPropagation()
             onAddWithTemperature(product, "Frío")
           }}
-          className="flex-1 h-9 px-2 bg-blue-100 hover:bg-blue-200 rounded-md text-xs md:text-sm font-semibold transition-colors"
+          className="w-full h-9 px-2 bg-blue-100 hover:bg-blue-200 rounded-md text-xs md:text-sm font-semibold transition-colors"
         >
           Frío
         </button>
@@ -67,7 +67,7 @@ export const ProductActionButtons = React.memo(({
             e.stopPropagation()
             onAddWithTemperature(product, "Caliente")
           }}
-          className="flex-1 h-9 px-2 bg-red-100 hover:bg-red-200 rounded-md text-xs md:text-sm font-semibold transition-colors"
+          className="w-full h-9 px-2 bg-red-100 hover:bg-red-200 rounded-md text-xs md:text-sm font-semibold transition-colors"
         >
           Caliente
         </button>
@@ -78,13 +78,13 @@ export const ProductActionButtons = React.memo(({
   // Si es smoothie Y NO está seleccionado → mostrar botones de leche
   if (isSmootie && !isSelected) {
     return (
-      <div className="flex gap-2 w-full">
+      <div className="flex flex-col gap-2 w-full">
         <button
           onClick={(e) => {
             e.stopPropagation()
             onAddWithMilkType(product, "Lactosa")
           }}
-          className="flex-1 h-9 px-2 bg-blue-100 hover:bg-blue-200 rounded-md text-xs md:text-sm font-semibold transition-colors"
+          className="w-full h-9 px-2 bg-blue-100 hover:bg-blue-200 rounded-md text-xs md:text-sm font-semibold transition-colors"
         >
           Lactosa
         </button>
@@ -93,7 +93,7 @@ export const ProductActionButtons = React.memo(({
             e.stopPropagation()
             onAddWithMilkType(product, "Deslactosada")
           }}
-          className="flex-1 h-9 px-2 bg-green-100 hover:bg-green-200 rounded-md text-xs md:text-sm font-semibold transition-colors"
+          className="w-full h-9 px-2 bg-green-100 hover:bg-green-200 rounded-md text-xs md:text-sm font-semibold transition-colors"
         >
           Deslactosada
         </button>

@@ -60,7 +60,7 @@ export const ProductCard = React.memo(({
   return (
     <Card
       key={product.id}
-      className={`overflow-hidden transition-all border-2 flex flex-col relative ${
+      className={`!p-0 overflow-hidden transition-all border-2 flex flex-col relative ${
         isSelected
           ? "border-primary bg-primary/5 shadow-lg scale-[1.02]"
           : canSelect
