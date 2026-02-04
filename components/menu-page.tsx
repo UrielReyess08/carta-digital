@@ -7,6 +7,7 @@ import { OrderSidebar } from "@/components/order-sidebar"
 import { CategoryFilter } from "@/components/category-filter"
 import { ProductCard } from "@/components/product-card"
 import { FloatingCartButton } from "@/components/floating-cart-button"
+import { PromoBanner } from "@/components/promo-banner"
 import { getCategoriesInOrder, getProductsByCategory, menuData } from "@/lib/menu-data"
 import { generateWhatsAppMessage, getWhatsAppLink } from "@/lib/whatsapp-utils"
 import { useCart } from "@/hooks/useCart"
@@ -164,6 +165,9 @@ export function MenuPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-background">
       <MenuHeader totalItems={totalItems} />
+      
+      {/* Banner Promo */}
+      <PromoBanner />
 
       {/* Filtros de Categoría */}
       <div className="max-w-6xl mx-auto px-4">
