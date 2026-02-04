@@ -11,24 +11,24 @@ export const menuData: MenuItem[] = [
 
   // CAFÉ 7oz
   { id: "cafe-vikingo-baileys-7", name: "Vikingo Baileys Coffee", price: 6.00, category: "CAFÉ 7oz", description: "Espresso + Baileys + crema", image: "/VikingoBaileysCoffee.webp" },
-  { id: "cafe-vikingo-bombom-7", name: "Vikingo Bom bóm", price: 5.00, category: "CAFÉ 7oz", description: "Espresso + Ron + crema" },
+  //{ id: "cafe-vikingo-bombom-7", name: "Vikingo Bom bóm", price: 5.00, category: "CAFÉ 7oz", description: "Espresso + Ron + crema" },
 
   // CAFÉ 10oz
   { id: "cafe-americano-10", name: "Americano", price: 3.00, category: "CAFÉ 10oz", image: "/americano.webp"},
   { id: "cafe-espresso-10", name: "Espresso", price: 3.00, category: "CAFÉ 10oz", image: "/Espresso.webp" },
   { id: "cafe-cappuccino-10", name: "Cappuccino", price: 4.00, category: "CAFÉ 10oz", image: "/Capuccino.webp"},
   { id: "cafe-mocaccino-10", name: "Mocaccino", price: 5.00, category: "CAFÉ 10oz", image: "/Mocaccino.webp"},
-  { id: "cafe-winter-summer-10", name: "Winter / Summer Coffee", price: 4.00, category: "CAFÉ 10oz", description: "Americano + crema" },
-  { id: "cafe-vikingo-power-10", name: "Vikingo Power Coffee", price: 5.00, category: "CAFÉ 10oz", description: "Doble espresso + crema" },
+  //{ id: "cafe-winter-summer-10", name: "Winter / Summer Coffee", price: 4.00, category: "CAFÉ 10oz", description: "Americano + crema" },
+  //{ id: "cafe-vikingo-power-10", name: "Vikingo Power Coffee", price: 5.00, category: "CAFÉ 10oz", description: "Doble espresso + crema" },
 
   // CAFÉ 12oz
-  { id: "cafe-latte-12", name: "Coffee latte", price: 7.00, category: "CAFÉ 12oz", description: "Espresso + leche + crema" },
+  //{ id: "cafe-latte-12", name: "Coffee latte", price: 7.00, category: "CAFÉ 12oz", description: "Espresso + leche + crema" },
 
   // SIN CAFÉ 12oz
-  { id: "sincafe-choco-milk-12", name: "Choco milk", price: 7.00, category: "SIN CAFÉ 12oz", description: "Cacao + leche + crema", image: "/chocomilk.webp" },
+  { id: "sincafe-choco-milk-12", name: "Choco milk", price: 7.00, category: "SIN CAFÉ 12oz", image: "/chocomilk.webp" },
   { id: "sincafe-choco-baileys-12", name: "Choco Baileys", price: 10.00, category: "SIN CAFÉ 12oz", image: "/ChocoBAILEYS.webp" },
   { id: "sincafe-caramel-latte-12", name: "Caramel Latte", price: 7.00, category: "SIN CAFÉ 12oz", image: "/CARAMEL LATTE.webp" },
-  { id: "sincafe-baileys-latte-12", name: "Baileys Latte", price: 10.00, category: "SIN CAFÉ 12oz" },
+  //{ id: "sincafe-baileys-latte-12", name: "Baileys Latte", price: 10.00, category: "SIN CAFÉ 12oz" },
   { id: "trago-lumumba-latte-12", name: "Trago Lumumba", price: 10.00, category: "SIN CAFÉ 12oz", image: "/TRAGO LUMUMBA.webp"},
 
   // FRAPPUCCINOS 12oz
@@ -59,7 +59,7 @@ export const menuData: MenuItem[] = [
   { id: "snack-crepe-maracuya", name: "Crepe – Maracuyá", price: 4.00, category: "SNACKS", image: "/Crepes de Maracuya.webp" },
   { id: "snack-crepe-fresa", name: "Crepe - Fresa", price: 4.00, category: "SNACKS", image: "/Crepes de Fresa.webp"},
   { id: "snack-kanelbullar", name: "Kanelbullar", price: 4.00, description: "Rollo de canela sueco", category: "SNACKS", image: "/Kanelbullar.webp" },
-  { id: "snack-chokladbollar", name: "Chokladbollar", price: 2.00, description: "Trufas de chocolate sueco",  category: "SNACKS", image: "/Chokladbollar.webp" },
+  { id: "snack-chokladbollar", description: "Trufas de chocolate sueco", name: "Chokladbollar", price: 2.00, category: "SNACKS", image: "/Chokladbollar.webp" },
 
   // ADICIONALES
   { id: "adic-shot-baileys", name: "Shot de Baileys", price: 3.00, category: "ADICIONALES", image: "/Shot de Baileys.webp" },
@@ -71,7 +71,7 @@ export const getCategoriesInOrder = (): string[] => {
   return [
     "CAFÉ 7oz",
     "CAFÉ 10oz",
-    "CAFÉ 12oz",
+    //"CAFÉ 12oz",
     "SIN CAFÉ 12oz",
     "FRAPPUCCINOS 12oz",
     "SMOOTHIES 12oz",
