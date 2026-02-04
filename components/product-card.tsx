@@ -60,42 +60,89 @@ export const ProductCard = React.memo(({
   return (
     <Card
       key={product.id}
-      className={`p-4 transition-all border-2 flex flex-row items-start gap-3 relative ${
+      className={`overflow-hidden transition-all border-2 flex flex-col relative ${
         isSelected
-          ? "border-primary bg-primary/5 shadow-md"
+          ? "border-primary bg-primary/5 shadow-lg scale-[1.02]"
           : canSelect
-            ? "border-border hover:border-primary hover:shadow-md hover:bg-card cursor-pointer"
-            : "border-border opacity-40 cursor-not-allowed"
+            ? "border-border hover:border-primary hover:shadow-md hover:scale-[1.02] cursor-pointer"
+            : "border-border opacity-50 cursor-not-allowed"
       }`}
-      onClick={() => canSelect && onSelectProduct(product)}
     >
-      <button
-        onClick={(e) => {
-          e.stopPropagation()
-          onToggleLike(product.id)
-        }}
-        className="absolute bottom-2 right-2 p-1.5 rounded-full bg-white/80 hover:bg-white shadow-md transition-all z-10"
-        aria-label={`Like ${product.name}`}
-      >
-        <Heart
-          className={`w-5 h-5 transition-colors ${
-            likedProducts.has(product.id)
-              ? "fill-red-500 text-red-500"
-              : "text-gray-400"
-          }`}
-        />
-      </button>
+      {/* Imagen del Producto */}
+      {product.image ? (
+        <div 
+          className="relative w-full aspect-square bg-gradient-to-br from-yellow-50 to-orange-50 overflow-hidden"
+          onClick={() => canSelect && onSelectProduct(product)}
+        >
+          <Image
+            src={product.image}
+            alt={product.name}
+            fill
+            sizes="(max-width: 768px) 50vw, 33vw"
+            priority={isPriorityImage}
+            className="object-cover"
+          />
+          {/* Botón de Like */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onToggleLike(product.id)
+            }}
+            className="absolute top-2 right-2 p-2 rounded-full bg-white/90 hover:bg-white shadow-lg transition-all z-10"
+            aria-label={`Like ${product.name}`}
+          >
+            <Heart
+              className={`w-4 h-4 md:w-5 md:h-5 transition-colors ${
+                likedProducts.has(product.id)
+                  ? "fill-red-500 text-red-500"
+                  : "text-gray-400"
+              }`}
+            />
+          </button>
+        </div>
+      ) : (
+        <div 
+          className="relative w-full aspect-square bg-gradient-to-br from-yellow-100 to-orange-100 flex items-center justify-center"
+          onClick={() => canSelect && onSelectProduct(product)}
+        >
+          <span className="text-4xl">☕</span>
+          {/* Botón de Like */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onToggleLike(product.id)
+            }}
+            className="absolute top-2 right-2 p-2 rounded-full bg-white/90 hover:bg-white shadow-lg transition-all z-10"
+            aria-label={`Like ${product.name}`}
+          >
+            <Heart
+              className={`w-4 h-4 md:w-5 md:h-5 transition-colors ${
+                likedProducts.has(product.id)
+                  ? "fill-red-500 text-red-500"
+                  : "text-gray-400"
+              }`}
+            />
+          </button>
+        </div>
+      )}
 
-      <div className="flex-1 flex flex-col justify-between">
+      {/* Información del Producto */}
+      <div className="p-3 flex flex-col gap-2">
         <div>
-          <h4 className="font-semibold text-foreground">{product.name}</h4>
-          <p className="text-2xl font-bold text-primary">S/.{product.price.toFixed(2)}</p>
+          <h4 className="font-semibold text-sm md:text-base text-foreground line-clamp-2 min-h-[2.5rem]">
+            {product.name}
+          </h4>
+          <p className="text-xl md:text-2xl font-bold text-primary mt-1">
+            S/.{product.price.toFixed(2)}
+          </p>
           {product.description && (
-            <p className="text-xs text-muted-foreground mt-2 italic">{product.description}</p>
+            <p className="text-xs text-muted-foreground mt-1 line-clamp-2 italic">
+              {product.description}
+            </p>
           )}
         </div>
 
-        <div className="mt-3">
+        <div className="mt-auto">
           <ProductActionButtons
             product={product}
             selectedProducts={selectedProducts}
@@ -107,21 +154,6 @@ export const ProductCard = React.memo(({
           />
         </div>
       </div>
-
-      {/* Imagen a la DERECHA */}
-      {product.image && (
-        <Image 
-          src={product.image}
-          alt={product.name}
-          width={120}
-          height={120}
-          className="w-30 h-30 object-cover rounded-lg flex-shrink-0"
-          priority={isPriorityImage}
-          loading={isPriorityImage ? "eager" : "lazy"}
-          placeholder="blur"
-          blurDataURL="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect fill='%23f0f0f0' width='120' height='120'/%3E%3C/svg%3E"
-        />
-      )}
     </Card>
   )
 })

@@ -52,13 +52,13 @@ export const ProductActionButtons = React.memo(({
   // Si es SIN CAFÉ Y NO está seleccionado → mostrar botones de temperatura
   if (isSinCafe && !isSelected) {
     return (
-      <div className="flex flex-col gap-2">
+      <div className="flex gap-2 w-full">
         <button
           onClick={(e) => {
             e.stopPropagation()
             onAddWithTemperature(product, "Frío")
           }}
-          className="w-[120px] h-8 px-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-semibold transition-colors"
+          className="flex-1 h-9 px-2 bg-blue-100 hover:bg-blue-200 rounded-md text-xs md:text-sm font-semibold transition-colors"
         >
           Frío
         </button>
@@ -67,7 +67,7 @@ export const ProductActionButtons = React.memo(({
             e.stopPropagation()
             onAddWithTemperature(product, "Caliente")
           }}
-          className="w-[120px] h-8 px-2 bg-red-100 hover:bg-red-200 rounded text-sm font-semibold transition-colors"
+          className="flex-1 h-9 px-2 bg-red-100 hover:bg-red-200 rounded-md text-xs md:text-sm font-semibold transition-colors"
         >
           Caliente
         </button>
@@ -78,13 +78,13 @@ export const ProductActionButtons = React.memo(({
   // Si es smoothie Y NO está seleccionado → mostrar botones de leche
   if (isSmootie && !isSelected) {
     return (
-      <div className="flex flex-col gap-2">
+      <div className="flex gap-2 w-full">
         <button
           onClick={(e) => {
             e.stopPropagation()
             onAddWithMilkType(product, "Lactosa")
           }}
-          className="w-[120px] h-8 px-2 bg-blue-100 hover:bg-blue-200 rounded text-sm font-semibold transition-colors"
+          className="flex-1 h-9 px-2 bg-blue-100 hover:bg-blue-200 rounded-md text-xs md:text-sm font-semibold transition-colors"
         >
           Lactosa
         </button>
@@ -93,7 +93,7 @@ export const ProductActionButtons = React.memo(({
             e.stopPropagation()
             onAddWithMilkType(product, "Deslactosada")
           }}
-          className="w-[120px] h-8 px-2 bg-green-100 hover:bg-green-200 rounded text-sm font-semibold transition-colors"
+          className="flex-1 h-9 px-2 bg-green-100 hover:bg-green-200 rounded-md text-xs md:text-sm font-semibold transition-colors"
         >
           Deslactosada
         </button>
@@ -104,39 +104,45 @@ export const ProductActionButtons = React.memo(({
   // Si YA está seleccionado → mostrar controles +/-
   if (isSelected) {
     return (
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-2 w-full">
         <div className="flex items-center gap-2">
           <button
             onClick={(e) => {
               e.stopPropagation()
               onDecreaseQuantity(getProductKey(product.id, selected!.milkType, selected!.temperature))
             }}
-            className="p-1 rounded bg-gray-100 hover:bg-gray-200"
+            className="p-1.5 rounded-md bg-gray-200 hover:bg-gray-300 transition-colors"
             aria-label={`Disminuir cantidad ${product.name}`}
           >
-            <Minus className="w-4 h-4" />
+            <Minus className="w-3 h-3 md:w-4 md:h-4" />
           </button>
-          <span className="font-semibold">{selected!.quantity}</span>
+          <span className="font-bold text-sm md:text-base min-w-[20px] text-center">{selected!.quantity}</span>
           <button
             onClick={(e) => {
               e.stopPropagation()
               onIncreaseQuantity(getProductKey(product.id, selected!.milkType, selected!.temperature))
             }}
-            className="p-1 rounded bg-gray-100 hover:bg-gray-200"
+            className="p-1.5 rounded-md bg-primary hover:bg-primary/90 text-white transition-colors"
             aria-label={`Aumentar cantidad ${product.name}`}
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3 h-3 md:w-4 md:h-4" />
           </button>
         </div>
-        <div className="text-sm text-muted-foreground">
+        <div className="text-xs md:text-sm font-semibold text-primary">
           S/.{(product.price * selected!.quantity).toFixed(2)}
         </div>
       </div>
     )
   }
 
-  // Si NO es smoothie Y NO está seleccionado → mensaje "Toca para agregar"
-  return <span className="text-sm text-muted-foreground">Toca para agregar</span>
+  // Si NO es smoothie Y NO está seleccionado → botón de agregar
+  return (
+    <div className="w-full">
+      <div className="text-xs md:text-sm text-center text-muted-foreground font-medium py-2 border border-dashed border-gray-300 rounded-md">
+        Toca para agregar
+      </div>
+    </div>
+  )
 })
 
 ProductActionButtons.displayName = "ProductActionButtons"

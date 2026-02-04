@@ -36,8 +36,8 @@ export const OrderSidebar = React.memo(({
   onPushEvent,
 }: OrderSidebarProps) => {
   return (
-    <div className="lg:col-span-1">
-      <Card className="p-6 sticky top-24 border-2 border-primary bg-white shadow-lg">
+    <div className="w-full">
+      <Card className="p-4 md:p-6 lg:sticky lg:top-24 border-2 border-primary bg-white shadow-lg">
         <h3 className="text-xl font-bold mb-4 text-primary flex items-center gap-2">
           <ShoppingCart className="w-5 h-5" />
           Tu Pedido

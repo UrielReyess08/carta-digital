@@ -4,8 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { Badge } from "@/components/ui/badge"
 import { MenuHeader } from "@/components/menu-header"
 import { OrderSidebar } from "@/components/order-sidebar"
-import { CategorySection } from "@/components/category-section"
-import { getCategoriesInOrder, getProductsByCategory } from "@/lib/menu-data"
+import { CategoryFilter } from "@/components/category-filter"
+import { ProductCard } from "@/components/product-card"
+import { FloatingCartButton } from "@/components/floating-cart-button"
+import { getCategoriesInOrder, getProductsByCategory, menuData } from "@/lib/menu-data"
 import { generateWhatsAppMessage, getWhatsAppLink } from "@/lib/whatsapp-utils"
 import { useCart } from "@/hooks/useCart"
 import { useAnalytics } from "@/hooks/useAnalytics"
@@ -20,7 +22,8 @@ const getProductKey = (productId: string, milkType?: string, temperature?: strin
 }
 
 export function MenuPage() {
-  const [openCategory, setOpenCategory] = useState<string | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const cartRef = useRef<HTMLDivElement>(null)
 
   const categories = getCategoriesInOrder()
 
@@ -136,37 +139,54 @@ export function MenuPage() {
     return () => window.removeEventListener("scroll", onScroll)
   }, [trackScroll])
 
-  const toggleCategory = useCallback(
-    (category: string) => {
-      setOpenCategory((prev) => {
-        const willOpen = prev !== category
-        const next = willOpen ? category : null
+  const handleSelectCategory = useCallback(
+    (category: string | null) => {
+      setSelectedCategory(category)
 
-        if (willOpen) {
-          const products = getProductsByCategory(category)
-          const categoryIndex = Math.max(1, categories.indexOf(category) + 1)
-          trackViewCategory(category, categoryIndex, products.length)
-        }
-
-        return next
-      })
+      if (category) {
+        const products = getProductsByCategory(category)
+        const categoryIndex = Math.max(1, categories.indexOf(category) + 1)
+        trackViewCategory(category, categoryIndex, products.length)
+      }
     },
     [categories, trackViewCategory]
   )
 
+  const scrollToCart = useCallback(() => {
+    cartRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+  }, [])
+
+  // Filtrar productos según la categoría seleccionada
+  const displayedProducts = selectedCategory
+    ? menuData.filter((p) => p.category === selectedCategory)
+    : menuData
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-50 to-background">
       <MenuHeader totalItems={totalItems} />
 
+      {/* Filtros de Categoría */}
+      <div className="max-w-6xl mx-auto px-4">
+        <CategoryFilter
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onSelectCategory={handleSelectCategory}
+        />
+      </div>
+
+      {/* Botón flotante del carrito (solo móvil) */}
+      <FloatingCartButton totalItems={totalItems} onClick={scrollToCart} />
+
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="max-w-6xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <div className="mb-8">
-              <h2 className="text-3xl font-bold mb-2 text-foreground">Selecciona tus Productos</h2>
-              <p className="text-muted-foreground flex items-center gap-2">
-                <span className="text-sm font-medium">Máximo 12 productos por pedido</span>
+            <div className="mb-6">
+              <h2 className="text-2xl md:text-3xl font-bold mb-2 text-foreground">
+                {selectedCategory || "Todos los Productos"}
+              </h2>
+              <p className="text-muted-foreground flex items-center gap-2 text-sm">
+                <span className="font-medium">Máximo 12 productos por pedido</span>
                 {totalItems === 12 && (
                   <Badge variant="destructive" className="text-xs">
                     Límite alcanzado
@@ -175,40 +195,37 @@ export function MenuPage() {
               </p>
             </div>
 
-            <div className="space-y-4">
-              {categories.map((category, index) => {
-                const products = getProductsByCategory(category)
-                const isOpen = openCategory === category
-                // Las primeras 2 categorías (CAFÉ 7oz, CAFÉ 10oz) son primarias
-                const isPrimaryCategory = index < 2
-
-                return (
-                  <CategorySection
-                    key={category}
-                    category={category}
-                    products={products}
-                    isOpen={isOpen}
-                    isPrimaryCategory={isPrimaryCategory}
-                    selectedProducts={selectedProducts}
-                    likedProducts={likedProducts}
-                    totalItems={totalItems}
-                    maxTotalItems={MAX_TOTAL_ITEMS}
-                    getProductKey={getProductKey}
-                    onToggleCategory={toggleCategory}
-                    onSelectProduct={handleSelectProduct}
-                    onAddWithTemperature={handleAddWithTemperature}
-                    onAddWithMilkType={handleAddWithMilkType}
-                    onIncreaseQuantity={handleIncreaseQuantity}
-                    onDecreaseQuantity={decreaseQuantity}
-                    onToggleLike={toggleLike}
-                    onPushEvent={pushDataLayerEvent}
-                  />
-                )
-              })}
+            {/* Grid de Productos */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+              {displayedProducts.map((product, index) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  selectedProducts={selectedProducts}
+                  likedProducts={likedProducts}
+                  totalItems={totalItems}
+                  maxTotalItems={MAX_TOTAL_ITEMS}
+                  isPriorityImage={index < 6}
+                  getProductKey={getProductKey}
+                  onSelectProduct={handleSelectProduct}
+                  onAddWithTemperature={handleAddWithTemperature}
+                  onAddWithMilkType={handleAddWithMilkType}
+                  onIncreaseQuantity={handleIncreaseQuantity}
+                  onDecreaseQuantity={decreaseQuantity}
+                  onToggleLike={toggleLike}
+                  onPushEvent={pushDataLayerEvent}
+                />
+              ))}
             </div>
+
+            {displayedProducts.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No hay productos en esta categoría</p>
+              </div>
+            )}
           </div>
 
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1" ref={cartRef}>
             <OrderSidebar
               selectedProducts={selectedProducts}
               totalPrice={totalPrice}
