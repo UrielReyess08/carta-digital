@@ -1,7 +1,6 @@
 "use client"
 
 import React from "react"
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area"
 import { Badge } from "@/components/ui/badge"
 
 interface CategoryFilterProps {
@@ -17,8 +16,8 @@ export const CategoryFilter = React.memo(({
 }: CategoryFilterProps) => {
   return (
     <div className="sticky top-16 z-30 bg-background/95 backdrop-blur-sm border-b border-border py-3 -mx-4 px-4">
-      <ScrollArea className="w-full whitespace-nowrap">
-        <div className="flex gap-2">
+      <div className="overflow-x-auto scrollbar-hide">
+        <div className="flex gap-2 pb-1">
           <button
             onClick={() => onSelectCategory(null)}
             className={`inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-all ${
@@ -43,8 +42,7 @@ export const CategoryFilter = React.memo(({
             </button>
           ))}
         </div>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+      </div>
     </div>
   )
 })
