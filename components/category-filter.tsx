@@ -43,6 +43,7 @@ export const CategoryFilter = React.memo(({
             </button>
           ))}
         </div>
+        <ScrollBar orientation="horizontal" />
       </ScrollArea>
     </div>
   )
