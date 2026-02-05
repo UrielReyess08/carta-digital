@@ -18,7 +18,7 @@ export function AdminQR() {
           margin: 2,
           color: {
             dark: "#DC2626",
-            light: "#FEF2F2",
+            light: "#F7EAD7",
           },
           errorCorrectionLevel: "H",
         })

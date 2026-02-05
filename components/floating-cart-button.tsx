@@ -22,7 +22,7 @@ export const FloatingCartButton = React.memo(({
       aria-label="Ver carrito"
     >
       <ShoppingCart className="w-6 h-6" />
-      <Badge className="absolute -top-2 -right-2 bg-red-500 text-white border-2 border-background min-w-[24px] h-6 flex items-center justify-center">
+      <Badge className="absolute -top-2 -right-2 bg-primary text-primary-foreground border-2 border-background min-w-[24px] h-6 flex items-center justify-center">
         {totalItems}
       </Badge>
     </button>

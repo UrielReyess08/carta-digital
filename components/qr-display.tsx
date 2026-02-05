@@ -17,7 +17,7 @@ export function QRDisplay() {
           margin: 2,
           color: {
             dark: "#DC2626",
-            light: "#FEF2F2",
+            light: "#F7EAD7",
           },
         })
         setQrUrl(qr)
