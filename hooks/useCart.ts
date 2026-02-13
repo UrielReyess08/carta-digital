@@ -13,18 +13,24 @@ export interface SelectedProduct {
   quantity: number
   category?: string
   milkType?: "Lactosa" | "Deslactosada"
-  temperature?: "Frío" | "Caliente"
+  temperature?: "Frío" | "Tibio" | "Caliente"
+  sweetener?: "Azúcar" | "Stevia"
+  sugarSpoons?: number
 }
 
 // Helper puro - no depende de estado
 const getProductKey = (
   productId: string,
   milkType?: string,
-  temperature?: string
+  temperature?: string,
+  sweetener?: string,
+  sugarSpoons?: number
 ): string => {
   let key = productId
   if (milkType) key += `-${milkType.toLowerCase()}`
   if (temperature) key += `-${temperature.toLowerCase()}`
+  if (sweetener) key += `-${sweetener.toLowerCase()}`
+  if (sugarSpoons) key += `-${sugarSpoons}spoons`
   return key
 }
 
@@ -37,19 +43,25 @@ interface UseCartReturn {
   selectProduct: (
     product: MenuItem,
     onAddProduct?: (product: any) => void,
-    onStartOrder?: (items: number, value: number) => void
+    onStartOrder?: (items: number, value: number) => void,
+    sweetener?: "Azúcar" | "Stevia",
+    sugarSpoons?: number
   ) => void
   addWithMilkType: (
     product: MenuItem,
     milkType: "Lactosa" | "Deslactosada",
     onAddProduct?: (product: any) => void,
-    onStartOrder?: (items: number, value: number) => void
+    onStartOrder?: (items: number, value: number) => void,
+    sweetener?: "Azúcar" | "Stevia",
+    sugarSpoons?: number
   ) => void
   addWithTemperature: (
     product: MenuItem,
-    temperature: "Frío" | "Caliente",
+    temperature: "Frío" | "Tibio" | "Caliente",
     onAddProduct?: (product: any) => void,
-    onStartOrder?: (items: number, value: number) => void
+    onStartOrder?: (items: number, value: number) => void,
+    sweetener?: "Azúcar" | "Stevia",
+    sugarSpoons?: number
   ) => void
   removeProduct: (key: string) => void
   increaseQuantity: (
@@ -86,12 +98,13 @@ export function useCart(): UseCartReturn {
     (
       product: MenuItem,
       onAddProduct?: (product: any) => void,
-      onStartOrder?: (items: number, value: number) => void
+      onStartOrder?: (items: number, value: number) => void,
+      sweetener?: "Azúcar" | "Stevia",
+      sugarSpoons?: number
     ) => {
-      const isSinCafe = product.category.includes("SIN CAFÉ")
+      const requiresTemperature = Boolean(product.temperatureOptions?.length)
       const isSmootie = product.category.includes("SMOOTHIES")
-      const alreadySelected = selectedProducts.has(product.id)
-      if ((isSinCafe || isSmootie) && !alreadySelected) {
+      if (requiresTemperature || isSmootie) {
         return
       }
 
@@ -102,7 +115,7 @@ export function useCart(): UseCartReturn {
           0
         )
 
-        const key = getProductKey(product.id)
+        const key = getProductKey(product.id, undefined, undefined, sweetener, sugarSpoons)
         if (newSelected.has(key)) {
           const existing = newSelected.get(key)!
           if (currentTotal < MAX_TOTAL_ITEMS) {
@@ -127,6 +140,8 @@ export function useCart(): UseCartReturn {
               price: product.price,
               quantity: 1,
               category: product.category,
+              sweetener: sweetener,
+              sugarSpoons: sugarSpoons,
             })
             if (onAddProduct) {
               onAddProduct({
@@ -156,7 +171,9 @@ export function useCart(): UseCartReturn {
       product: MenuItem,
       milkType: "Lactosa" | "Deslactosada",
       onAddProduct?: (product: any) => void,
-      onStartOrder?: (items: number, value: number) => void
+      onStartOrder?: (items: number, value: number) => void,
+      sweetener?: "Azúcar" | "Stevia",
+      sugarSpoons?: number
     ) => {
       setSelectedProducts((prevSelected) => {
         const newSelected = new Map(prevSelected)
@@ -167,7 +184,7 @@ export function useCart(): UseCartReturn {
 
         if (currentTotal >= MAX_TOTAL_ITEMS) return prevSelected
 
-        const key = getProductKey(product.id, milkType)
+        const key = getProductKey(product.id, milkType, undefined, sweetener, sugarSpoons)
         const existing = newSelected.get(key)
 
         if (existing) {
@@ -180,6 +197,8 @@ export function useCart(): UseCartReturn {
             quantity: 1,
             milkType: milkType,
             category: product.category,
+            sweetener: sweetener,
+            sugarSpoons: sugarSpoons,
           })
         }
 
@@ -208,9 +227,11 @@ export function useCart(): UseCartReturn {
   const addWithTemperature = useCallback(
     (
       product: MenuItem,
-      temperature: "Frío" | "Caliente",
+      temperature: "Frío" | "Tibio" | "Caliente",
       onAddProduct?: (product: any) => void,
-      onStartOrder?: (items: number, value: number) => void
+      onStartOrder?: (items: number, value: number) => void,
+      sweetener?: "Azúcar" | "Stevia",
+      sugarSpoons?: number
     ) => {
       setSelectedProducts((prevSelected) => {
         const newSelected = new Map(prevSelected)
@@ -221,7 +242,7 @@ export function useCart(): UseCartReturn {
 
         if (currentTotal >= MAX_TOTAL_ITEMS) return prevSelected
 
-        const key = getProductKey(product.id, undefined, temperature)
+        const key = getProductKey(product.id, undefined, temperature, sweetener, sugarSpoons)
         const existing = newSelected.get(key)
 
         if (existing) {
@@ -234,6 +255,8 @@ export function useCart(): UseCartReturn {
             quantity: 1,
             temperature: temperature,
             category: product.category,
+            sweetener: sweetener,
+            sugarSpoons: sugarSpoons,
           })
         }
 

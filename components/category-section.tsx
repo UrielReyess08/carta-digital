@@ -11,7 +11,9 @@ interface SelectedProduct {
   quantity: number
   category?: string
   milkType?: "Lactosa" | "Deslactosada"
-  temperature?: "Frío" | "Caliente"
+  temperature?: "Frío" | "Tibio" | "Caliente"
+  sweetener?: "Azúcar" | "Stevia"
+  sugarSpoons?: number
 }
 
 interface CategorySectionProps {
@@ -23,11 +25,9 @@ interface CategorySectionProps {
   likedProducts: Set<string>
   totalItems: number
   maxTotalItems: number
-  getProductKey: (productId: string, milkType?: string, temperature?: string) => string
+  getProductKey: (productId: string, milkType?: string, temperature?: string, sweetener?: string, sugarSpoons?: number) => string
   onToggleCategory: (category: string) => void
   onSelectProduct: (product: MenuItem) => void
-  onAddWithTemperature: (product: MenuItem, temperature: "Frío" | "Caliente") => void
-  onAddWithMilkType: (product: MenuItem, milkType: "Lactosa" | "Deslactosada") => void
   onIncreaseQuantity: (key: string) => void
   onDecreaseQuantity: (key: string) => void
   onToggleLike: (productId: string) => void
@@ -46,8 +46,6 @@ export const CategorySection = React.memo(({
   getProductKey,
   onToggleCategory,
   onSelectProduct,
-  onAddWithTemperature,
-  onAddWithMilkType,
   onIncreaseQuantity,
   onDecreaseQuantity,
   onToggleLike,
@@ -75,15 +73,10 @@ export const CategorySection = React.memo(({
         <div className="px-6 py-4 bg-white">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {products.map((product, index) => {
-              const isSmootie = product.category.includes("SMOOTHIES")
-              // Para smoothies, check si existe cualquier variante (Lactosa o Deslactosada)
-              // Para otros productos, check el id simple
-              const hasAnyVariant = isSmootie && (
-                selectedProducts.has(getProductKey(product.id, "Lactosa")) ||
-                selectedProducts.has(getProductKey(product.id, "Deslactosada"))
+              const selected = Array.from(selectedProducts.values()).find(
+                (item) => item.id === product.id
               )
-              const selected = selectedProducts.get(product.id) || (hasAnyVariant ? {} as SelectedProduct : undefined)
-              const isSelected = Boolean(selected && Object.keys(selected).length > 0)
+              const isSelected = Boolean(selected)
               const canSelect = !isSelected && totalItems < maxTotalItems
               // Priority para primeras 2 imágenes de categorías primarias
               const isPriorityImage = !!(isPrimaryCategory && index < 2 && product.image)
@@ -99,8 +92,6 @@ export const CategorySection = React.memo(({
                   getProductKey={getProductKey}
                   isPriorityImage={isPriorityImage}
                   onSelectProduct={onSelectProduct}
-                  onAddWithTemperature={onAddWithTemperature}
-                  onAddWithMilkType={onAddWithMilkType}
                   onIncreaseQuantity={onIncreaseQuantity}
                   onDecreaseQuantity={onDecreaseQuantity}
                   onToggleLike={onToggleLike}

@@ -9,15 +9,15 @@ interface SelectedProduct {
   quantity: number
   category?: string
   milkType?: "Lactosa" | "Deslactosada"
-  temperature?: "Frío" | "Caliente"
+  temperature?: "Frío" | "Tibio" | "Caliente"
+  sweetener?: "Azúcar" | "Stevia"
+  sugarSpoons?: number
 }
 
 interface ProductActionButtonsProps {
   product: MenuItem
   selectedProducts: Map<string, SelectedProduct>
-  getProductKey: (productId: string, milkType?: string, temperature?: string) => string
-  onAddWithTemperature: (product: MenuItem, temperature: "Frío" | "Caliente") => void
-  onAddWithMilkType: (product: MenuItem, milkType: "Lactosa" | "Deslactosada") => void
+  getProductKey: (productId: string, milkType?: string, temperature?: string, sweetener?: string, sugarSpoons?: number) => string
   onIncreaseQuantity: (key: string) => void
   onDecreaseQuantity: (key: string) => void
 }
@@ -26,80 +26,13 @@ export const ProductActionButtons = React.memo(({
   product,
   selectedProducts,
   getProductKey,
-  onAddWithTemperature,
-  onAddWithMilkType,
   onIncreaseQuantity,
   onDecreaseQuantity,
 }: ProductActionButtonsProps) => {
-  const isSinCafe = product.category.includes("SIN CAFÉ")
-  const isSmootie = product.category.includes("SMOOTHIES")
-
-  // Para SIN CAFÉ, check si existe cualquier variante
-  const hasSinCafeVariant = isSinCafe && (
-    selectedProducts.has(getProductKey(product.id, undefined, "Frío")) ||
-    selectedProducts.has(getProductKey(product.id, undefined, "Caliente"))
+  const selected = Array.from(selectedProducts.values()).find(
+    (item) => item.id === product.id
   )
-
-  // Para smoothies, check si existe cualquier variante
-  const hasSmoothieVariant = isSmootie && (
-    selectedProducts.has(getProductKey(product.id, "Lactosa")) ||
-    selectedProducts.has(getProductKey(product.id, "Deslactosada"))
-  )
-
-  const selected = selectedProducts.get(product.id) || (hasSinCafeVariant || hasSmoothieVariant ? {} as SelectedProduct : undefined)
-  const isSelected = Boolean(selected && Object.keys(selected).length > 0)
-
-  // Si es SIN CAFÉ Y NO está seleccionado → mostrar botones de temperatura
-  if (isSinCafe && !isSelected) {
-    return (
-      <div className="flex flex-col gap-2 w-full">
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onAddWithTemperature(product, "Frío")
-          }}
-          className="w-full h-9 px-2 bg-blue-100 hover:bg-blue-200 rounded-md text-xs md:text-sm font-semibold transition-colors"
-        >
-          Frío
-        </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onAddWithTemperature(product, "Caliente")
-          }}
-          className="w-full h-9 px-2 bg-red-100 hover:bg-red-200 rounded-md text-xs md:text-sm font-semibold transition-colors"
-        >
-          Caliente
-        </button>
-      </div>
-    )
-  }
-
-  // Si es smoothie Y NO está seleccionado → mostrar botones de leche
-  if (isSmootie && !isSelected) {
-    return (
-      <div className="flex flex-col gap-2 w-full">
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onAddWithMilkType(product, "Lactosa")
-          }}
-          className="w-full h-9 px-2 bg-blue-100 hover:bg-blue-200 rounded-md text-xs md:text-sm font-semibold transition-colors"
-        >
-          Lactosa
-        </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            onAddWithMilkType(product, "Deslactosada")
-          }}
-          className="w-full h-9 px-2 bg-green-100 hover:bg-green-200 rounded-md text-xs md:text-sm font-semibold transition-colors"
-        >
-          Deslactosada
-        </button>
-      </div>
-    )
-  }
+  const isSelected = Boolean(selected)
 
   // Si YA está seleccionado → mostrar controles +/-
   if (isSelected) {
@@ -109,7 +42,7 @@ export const ProductActionButtons = React.memo(({
           <button
             onClick={(e) => {
               e.stopPropagation()
-              onDecreaseQuantity(getProductKey(product.id, selected!.milkType, selected!.temperature))
+              onDecreaseQuantity(getProductKey(product.id, selected!.milkType, selected!.temperature, selected!.sweetener, selected!.sugarSpoons))
             }}
             className="p-1.5 rounded-md bg-gray-200 hover:bg-gray-300 transition-colors"
             aria-label={`Disminuir cantidad ${product.name}`}
@@ -120,7 +53,7 @@ export const ProductActionButtons = React.memo(({
           <button
             onClick={(e) => {
               e.stopPropagation()
-              onIncreaseQuantity(getProductKey(product.id, selected!.milkType, selected!.temperature))
+              onIncreaseQuantity(getProductKey(product.id, selected!.milkType, selected!.temperature, selected!.sweetener, selected!.sugarSpoons))
             }}
             className="p-1.5 rounded-md bg-primary hover:bg-primary/90 text-white transition-colors"
             aria-label={`Aumentar cantidad ${product.name}`}
@@ -135,7 +68,7 @@ export const ProductActionButtons = React.memo(({
     )
   }
 
-  // Si NO es smoothie Y NO está seleccionado → botón de agregar
+  // Si NO está seleccionado → botón de agregar
   return (
     <div className="w-full">
       <div className="text-xs md:text-sm text-center text-muted-foreground font-medium py-2 border border-dashed border-gray-300 rounded-md">

@@ -11,7 +11,9 @@ interface SelectedProduct {
   quantity: number
   category?: string
   milkType?: "Lactosa" | "Deslactosada"
-  temperature?: "Frío" | "Caliente"
+  temperature?: "Frío" | "Tibio" | "Caliente"
+  sweetener?: "Azúcar" | "Stevia"
+  sugarSpoons?: number
 }
 
 interface OrderSidebarProps {
@@ -54,11 +56,15 @@ export const OrderSidebar = React.memo(({
                 <div key={key} className="flex justify-between items-center border-b border-border pb-3">
                   <div className="flex-1">
                     <p className="font-medium text-sm text-foreground">{item.name}</p>
-                    {(item.temperature || item.milkType) && (
+                    {(item.temperature || item.milkType || item.sweetener || item.sugarSpoons) && (
                       <p className="text-xs text-muted-foreground">
                         {item.temperature && <span>{item.temperature}</span>}
                         {item.temperature && item.milkType && <span> • </span>}
                         {item.milkType && <span>Leche: {item.milkType}</span>}
+                        {(item.temperature || item.milkType) && item.sweetener && <span> • </span>}
+                        {item.sweetener && <span>{item.sweetener}</span>}
+                        {(item.temperature || item.milkType || item.sweetener) && item.sugarSpoons && <span> • </span>}
+                        {item.sugarSpoons && <span>{item.sugarSpoons} cucharadas</span>}
                       </p>
                     )}
                     <p className="text-sm font-bold text-primary">S/.{(item.price * item.quantity).toFixed(2)}</p>

@@ -12,7 +12,8 @@ interface SelectedProduct {
   quantity: number
   category?: string
   milkType?: "Lactosa" | "Deslactosada"
-  temperature?: "Frío" | "Caliente"
+  temperature?: "Frío" | "Tibio" | "Caliente"
+  sweetener?: "Azúcar" | "Stevia"
 }
 
 interface ProductCardProps {
@@ -22,10 +23,8 @@ interface ProductCardProps {
   totalItems: number
   maxTotalItems: number
   isPriorityImage?: boolean
-  getProductKey: (productId: string, milkType?: string, temperature?: string) => string
+  getProductKey: (productId: string, milkType?: string, temperature?: string, sweetener?: string, sugarSpoons?: number) => string
   onSelectProduct: (product: MenuItem) => void
-  onAddWithTemperature: (product: MenuItem, temperature: "Frío" | "Caliente") => void
-  onAddWithMilkType: (product: MenuItem, milkType: "Lactosa" | "Deslactosada") => void
   onIncreaseQuantity: (key: string) => void
   onDecreaseQuantity: (key: string) => void
   onToggleLike: (productId: string) => void
@@ -41,28 +40,24 @@ export const ProductCard = React.memo(({
   isPriorityImage = false,
   getProductKey,
   onSelectProduct,
-  onAddWithTemperature,
-  onAddWithMilkType,
   onIncreaseQuantity,
   onDecreaseQuantity,
   onToggleLike,
   onPushEvent,
 }: ProductCardProps) => {
-  const isSmootie = product.category.includes("SMOOTHIES")
-  const hasAnyVariant = isSmootie && (
-    selectedProducts.has(getProductKey(product.id, "Lactosa")) ||
-    selectedProducts.has(getProductKey(product.id, "Deslactosada"))
+  const selected = Array.from(selectedProducts.values()).find(
+    (item) => item.id === product.id
   )
-  const selected = selectedProducts.get(product.id) || (hasAnyVariant ? {} as SelectedProduct : undefined)
-  const isSelected = Boolean(selected && Object.keys(selected).length > 0)
-  const canSelect = !isSelected && totalItems < maxTotalItems
+  const isSelected = Boolean(selected)
+  const hasOptions = Boolean(product.sweetenerOptions?.length || product.temperatureOptions?.length || product.category.includes("SMOOTHIES"))
+  const canSelect = (!isSelected && totalItems < maxTotalItems) || (isSelected && hasOptions)
 
   return (
     <Card
       key={product.id}
       className={`!p-0 overflow-hidden transition-all border-2 flex flex-col relative ${
         isSelected
-          ? "border-primary bg-primary/5 shadow-lg scale-[1.02]"
+          ? hasOptions ? "border-primary bg-primary/5 shadow-lg scale-[1.02] hover:shadow-lg cursor-pointer" : "border-primary bg-primary/5 shadow-lg scale-[1.02]"
           : canSelect
             ? "border-border hover:border-primary hover:shadow-md hover:scale-[1.02] cursor-pointer"
             : "border-border opacity-50 cursor-not-allowed"
@@ -135,11 +130,6 @@ export const ProductCard = React.memo(({
           <p className="text-xl md:text-2xl font-bold text-primary mt-1">
             S/.{product.price.toFixed(2)}
           </p>
-          {product.description && (
-            <p className="text-xs text-muted-foreground mt-1 line-clamp-2 italic">
-              {product.description}
-            </p>
-          )}
         </div>
 
         <div className="mt-auto">
@@ -147,8 +137,6 @@ export const ProductCard = React.memo(({
             product={product}
             selectedProducts={selectedProducts}
             getProductKey={getProductKey}
-            onAddWithTemperature={onAddWithTemperature}
-            onAddWithMilkType={onAddWithMilkType}
             onIncreaseQuantity={onIncreaseQuantity}
             onDecreaseQuantity={onDecreaseQuantity}
           />
