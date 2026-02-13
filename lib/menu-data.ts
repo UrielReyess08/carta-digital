@@ -9,6 +9,9 @@ export interface MenuItem {
 
 export const menuData: MenuItem[] = [
 
+  // PROMOCIONES
+  {id: "pina-colada", name: "Piña colada", price: 100.00, category: "PROMOCIONES", image: "/promos/FrozenArandano.webp"},
+
   // CAFÉ 7oz
   { id: "cafe-vikingo-baileys-7", name: "Vikingo Baileys Coffee", price: 6.00, category: "CAFÉ 7oz", image: "/Cafe7/VikingoBaileysCoffee.webp" },
   //{ id: "cafe-vikingo-bombom-7", name: "Vikingo Bom bóm", price: 5.00, category: "CAFÉ 7oz", description: "Espresso + Ron + crema" },
@@ -70,6 +73,7 @@ export const menuData: MenuItem[] = [
 
 export const getCategoriesInOrder = (): string[] => {
   return [
+    "PROMOCIONES",
     "CAFÉ 7oz",
     "CAFÉ 10oz",
     //"CAFÉ 12oz",
