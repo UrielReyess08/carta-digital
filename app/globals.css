@@ -3,6 +3,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+.animate-highlight-red {
+  background-color: rgba(237, 27, 36, 0.2) !important;
+  border-color: #ED1B24 !important;
+}
+
 :root {
   --background: #F7EAD7;
   --foreground: #000000;
@@ -172,6 +177,26 @@
 .animate-splash-bounce {
   animation: splash-bounce 2s ease-in-out infinite;
   animation-delay: 1s;
+}
+
+/* Animación de borde rojo brillante para promoción */
+@keyframes highlight-red {
+  0% {
+    border-color: #ED1B24;
+    box-shadow: 0 0 12px #ED1B24, 0 0 20px rgba(237, 27, 36, 0.3);
+  }
+  50% {
+    border-color: #ED1B24;
+    box-shadow: 0 0 20px #ED1B24, 0 0 35px rgba(237, 27, 36, 0.5);
+  }
+  100% {
+    border-color: #ED1B24;
+    box-shadow: 0 0 12px #ED1B24, 0 0 20px rgba(237, 27, 36, 0.3);
+  }
+}
+
+.animate-highlight-red {
+  animation: highlight-red 2s ease-in-out forwards;
 }
 
 /* Ocultar scrollbar pero mantener funcionalidad */

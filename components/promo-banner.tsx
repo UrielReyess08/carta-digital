@@ -4,21 +4,24 @@ import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 
 interface PromoBannerProps {
-  onPromoBannerClick?: () => void
+  onPromoBannerClick?: (action: string) => void
 }
 
 const PROMO_IMAGES = [
   {
     src: "/Carrusel/FotoPromo1.webp",
     alt: "Frappuccino",
+    action: "frappuccinos", // Acción específica de esta imagen
   },
   {
     src: "/Carrusel/FotoPromo2.webp",
     alt: "Piña Colada",
+    action: "promociones", // Acción específica de esta imagen
   },
   {
     src: "/Carrusel/FotoPromo3.webp",
     alt: "Cappuccino",
+    action: "cappuccino", // Acción específica de esta imagen
   },
 ]
 
@@ -26,40 +29,93 @@ export function PromoBanner({ onPromoBannerClick }: PromoBannerProps) {
   const [currentIndex, setCurrentIndex] = useState(0)
   const [touchStart, setTouchStart] = useState(0)
   const [touchEnd, setTouchEnd] = useState(0)
+  const [isAutoplayActive, setIsAutoplayActive] = useState(true)
   const carouselRef = useRef<HTMLDivElement>(null)
+  const autoplayTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const wasSwipeRef = useRef(false)
+
+  const handleBannerClick = () => {
+    // Solo ejecutar la acción si NO fue un swipe
+    if (!wasSwipeRef.current && onPromoBannerClick) {
+      const currentImage = PROMO_IMAGES[currentIndex]
+      onPromoBannerClick(currentImage.action)
+    }
+    // Resetear el flag
+    wasSwipeRef.current = false
+  }
 
   // Autoplay
   useEffect(() => {
+    if (!isAutoplayActive) return
+
     const interval = setInterval(() => {
       setCurrentIndex((prevIndex) => (prevIndex + 1) % PROMO_IMAGES.length)
     }, 5000)
 
     return () => clearInterval(interval)
-  }, [])
+  }, [isAutoplayActive])
 
-  // Detectar swipe
+  // Función para pausar el autoplay
+  const pauseAutoplay = () => {
+    setIsAutoplayActive(false)
+  }
+
+  // Función para reanudar el autoplay después de un tiempo
+  const scheduleAutoplayResume = () => {
+    if (autoplayTimeoutRef.current) {
+      clearTimeout(autoplayTimeoutRef.current)
+    }
+    
+    autoplayTimeoutRef.current = setTimeout(() => {
+      setIsAutoplayActive(true)
+    }, 8000) // Reanudar después de 8 segundos de inactividad
+  }
+
+  // Detectar inicio de toque
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart(e.targetTouches[0].clientX)
+    setTouchEnd(0)
+    wasSwipeRef.current = false
+    pauseAutoplay()
   }
 
   const handleTouchEnd = (e: React.TouchEvent) => {
-    setTouchEnd(e.changedTouches[0].clientX)
-    handleSwipe()
+    const endX = e.changedTouches[0].clientX
+    setTouchEnd(endX)
+    handleSwipe(touchStart, endX)
+    scheduleAutoplayResume()
   }
 
-  const handleSwipe = () => {
-    if (!touchStart || !touchEnd) return
+  const handleSwipe = (startX: number, endX: number) => {
+    if (!startX || !endX) return
 
-    const distance = touchStart - touchEnd
+    const distance = startX - endX
     const isLeftSwipe = distance > 50
     const isRightSwipe = distance < -50
 
-    if (isLeftSwipe) {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % PROMO_IMAGES.length)
-    } else if (isRightSwipe) {
-      setCurrentIndex((prevIndex) => (prevIndex - 1 + PROMO_IMAGES.length) % PROMO_IMAGES.length)
+    // Si hay movimiento significativo, es un swipe
+    if (isLeftSwipe || isRightSwipe) {
+      wasSwipeRef.current = true
+      
+      if (isLeftSwipe) {
+        setCurrentIndex((prevIndex) => (prevIndex + 1) % PROMO_IMAGES.length)
+      } else if (isRightSwipe) {
+        setCurrentIndex((prevIndex) => (prevIndex - 1 + PROMO_IMAGES.length) % PROMO_IMAGES.length)
+      }
+    } else {
+      // Si no hay movimiento significativo, es un clic
+      wasSwipeRef.current = false
     }
   }
+
+  // Limpiar timeout al desmontar
+  useEffect(() => {
+    return () => {
+      if (autoplayTimeoutRef.current) {
+        clearTimeout(autoplayTimeoutRef.current)
+      }
+    }
+  }, [])
 
   useEffect(() => {
     if (carouselRef.current) {
@@ -75,7 +131,7 @@ export function PromoBanner({ onPromoBannerClick }: PromoBannerProps) {
           className="relative w-full rounded-lg overflow-hidden shadow-lg cursor-pointer hover:shadow-xl transition-shadow"
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
-          onClick={onPromoBannerClick}
+          onClick={handleBannerClick}
         >
           {/* Carrusel */}
           <div className="relative w-full aspect-video md:aspect-[3/1] overflow-hidden">
@@ -107,6 +163,8 @@ export function PromoBanner({ onPromoBannerClick }: PromoBannerProps) {
                     onClick={(e) => {
                       e.stopPropagation()
                       setCurrentIndex(index)
+                      pauseAutoplay()
+                      scheduleAutoplayResume()
                     }}
                     className={`w-2 h-2 rounded-full transition-all ${
                       index === currentIndex ? "bg-white w-6" : "bg-white/60"

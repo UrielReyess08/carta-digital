@@ -29,6 +29,7 @@ interface ProductCardProps {
   onDecreaseQuantity: (key: string) => void
   onToggleLike: (productId: string) => void
   onPushEvent: (eventName: string, params: Record<string, any>) => void
+  isHighlighted?: boolean
 }
 
 export const ProductCard = React.memo(({
@@ -44,6 +45,7 @@ export const ProductCard = React.memo(({
   onDecreaseQuantity,
   onToggleLike,
   onPushEvent,
+  isHighlighted = false,
 }: ProductCardProps) => {
   const selected = Array.from(selectedProducts.values()).find(
     (item) => item.id === product.id
@@ -55,13 +57,14 @@ export const ProductCard = React.memo(({
 
   return (
     <Card
-      key={product.id}
       className={`!p-0 overflow-hidden transition-all border-2 flex flex-col relative ${
-        isSelected
-          ? hasOptions ? "border-primary bg-primary/5 shadow-lg scale-[1.02] hover:shadow-lg cursor-pointer" : "border-primary bg-primary/5 shadow-lg scale-[1.02]"
-          : canSelect
-            ? "border-border hover:border-primary hover:shadow-md hover:scale-[1.02] cursor-pointer"
-            : "border-border opacity-50 cursor-not-allowed"
+        isHighlighted
+          ? "border-red-500 animate-highlight-red"
+          : isSelected
+            ? hasOptions ? "border-primary bg-primary/5 shadow-lg scale-[1.02] hover:shadow-lg cursor-pointer" : "border-primary bg-primary/5 shadow-lg scale-[1.02]"
+            : canSelect
+              ? "border-border hover:border-primary hover:shadow-md hover:scale-[1.02] cursor-pointer"
+              : "border-border opacity-50 cursor-not-allowed"
       }`}
     >
       {/* Imagen del Producto */}
@@ -140,6 +143,7 @@ export const ProductCard = React.memo(({
             getProductKey={getProductKey}
             onIncreaseQuantity={onIncreaseQuantity}
             onDecreaseQuantity={onDecreaseQuantity}
+            onSelectProduct={onSelectProduct}
           />
         </div>
       </div>

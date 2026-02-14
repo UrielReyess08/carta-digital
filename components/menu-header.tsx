@@ -13,9 +13,9 @@ export const MenuHeader = React.memo(({ totalItems }: MenuHeaderProps) => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img
-              src="logo-el-vikingo-.png"
+              src="Isotipo.webp"
               alt="El Vikingo Coffee Bike"
-              className="h-14 w-14 object-contain transform scale-290"
+              className="h-14 w-14 object-contain transform scale-140"
             />
             <div>
               <h1 className="text-2xl font-bold text-primary">El Vikingo</h1>

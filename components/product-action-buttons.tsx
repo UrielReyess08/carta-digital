@@ -20,6 +20,7 @@ interface ProductActionButtonsProps {
   getProductKey: (productId: string, milkType?: string, temperature?: string, sweetener?: string, sugarSpoons?: number) => string
   onIncreaseQuantity: (key: string) => void
   onDecreaseQuantity: (key: string) => void
+  onSelectProduct: (product: MenuItem) => void
 }
 
 export const ProductActionButtons = React.memo(({
@@ -28,6 +29,7 @@ export const ProductActionButtons = React.memo(({
   getProductKey,
   onIncreaseQuantity,
   onDecreaseQuantity,
+  onSelectProduct,
 }: ProductActionButtonsProps) => {
   const selected = Array.from(selectedProducts.values()).find(
     (item) => item.id === product.id
@@ -71,9 +73,16 @@ export const ProductActionButtons = React.memo(({
   // Si NO está seleccionado → botón de agregar
   return (
     <div className="w-full">
-      <div className="text-xs md:text-sm text-center text-muted-foreground font-medium py-2 border border-dashed border-gray-300 rounded-md" style={{ background: "#ED1B24", borderColor: "#ED1B24", color: "#FFFF" }}>
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          onSelectProduct(product)
+        }}
+        className="w-full text-xs md:text-sm text-center font-medium py-2 border border-dashed rounded-md transition-all hover:opacity-90 active:scale-95"
+        style={{ background: "#ED1B24", borderColor: "#ED1B24", color: "#FFFFFF" }}
+      >
         Toca para agregar
-      </div>
+      </button>
     </div>
   )
 })

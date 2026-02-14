@@ -8,6 +8,7 @@ import { CategoryFilter } from "@/components/category-filter"
 import { ProductCard } from "@/components/product-card"
 import { FloatingCartButton } from "@/components/floating-cart-button"
 import { PromoBanner } from "@/components/promo-banner"
+import { Footer } from "@/components/footer"
 import { getCategoriesInOrder, getProductsByCategory, menuData, MenuItem } from "@/lib/menu-data"
 import { generateWhatsAppMessage, getWhatsAppLink } from "@/lib/whatsapp-utils"
 import { useCart } from "@/hooks/useCart"
@@ -30,6 +31,8 @@ type SweetenerOption = "Azúcar" | "Stevia"
 export function MenuPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
   const cartRef = useRef<HTMLDivElement>(null)
+  const cappuccinoRef = useRef<HTMLDivElement>(null)
+  const filterRef = useRef<HTMLDivElement>(null)
   const [isOptionsModalOpen, setIsOptionsModalOpen] = useState(false)
   const [pendingProduct, setPendingProduct] = useState<MenuItem | null>(null)
   const [pendingTemperature, setPendingTemperature] = useState<TemperatureOption | null>(null)
@@ -40,6 +43,7 @@ export function MenuPage() {
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false)
   const [customerName, setCustomerName] = useState("")
   const [customerPhone, setCustomerPhone] = useState("")
+  const [highlightedProductId, setHighlightedProductId] = useState<string | null>(null)
 
   const categories = getCategoriesInOrder()
 
@@ -256,6 +260,46 @@ export function MenuPage() {
     cartRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
   }, [])
 
+  const handlePromoBannerClick = useCallback(
+    (action: string) => {
+      if (action === "frappuccinos") {
+        // Primera foto: Frappuccinos
+        handleSelectCategory("FRAPPUCCINOS 12oz")
+        setTimeout(() => {
+          filterRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+        }, 100)
+      } else if (action === "promociones") {
+        // Segunda foto: Promociones
+        handleSelectCategory("PROMOCIONES")
+        setTimeout(() => {
+          filterRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+        }, 100)
+      } else if (action === "cappuccino") {
+        // Tercera foto: Cappuccino con animación
+        handleSelectCategory("CAFÉ 10oz")
+        setTimeout(() => {
+          filterRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })
+        }, 100)
+        
+        setHighlightedProductId("cafe-cappuccino-10")
+        
+        // Sacar el highlight después de 2 segundos
+        setTimeout(() => {
+          setHighlightedProductId(null)
+        }, 2000)
+        
+        // Scroll al producto después de un pequeño delay para permitir que se renderice
+        setTimeout(() => {
+          const cappuccinoElement = document.getElementById("cafe-cappuccino-10")
+          if (cappuccinoElement) {
+            cappuccinoElement.scrollIntoView({ behavior: "smooth", block: "center" })
+          }
+        }, 600)
+      }
+    },
+    [handleSelectCategory]
+  )
+
   // Filtrar productos según la categoría seleccionada
   const displayedProducts = selectedCategory
     ? menuData.filter((p) => p.category === selectedCategory)
@@ -266,10 +310,10 @@ export function MenuPage() {
       <MenuHeader totalItems={totalItems} />
       
       {/* Banner Promo */}
-      <PromoBanner onPromoBannerClick={() => handleSelectCategory("PROMOCIONES")} />
+      <PromoBanner onPromoBannerClick={(imageIndex) => handlePromoBannerClick(imageIndex)} />
 
       {/* Filtros de Categoría */}
-      <div className="max-w-6xl mx-auto px-4">
+      <div className="max-w-6xl mx-auto px-4" ref={filterRef}>
         <CategoryFilter
           categories={categories}
           selectedCategory={selectedCategory}
@@ -301,21 +345,23 @@ export function MenuPage() {
             {/* Grid de Productos */}
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
               {displayedProducts.map((product, index) => (
-                <ProductCard
-                  key={product.id}
-                  product={product}
-                  selectedProducts={selectedProducts}
-                  likedProducts={likedProducts}
-                  totalItems={totalItems}
-                  maxTotalItems={MAX_TOTAL_ITEMS}
-                  isPriorityImage={index < 6}
-                  getProductKey={getProductKey}
-                  onSelectProduct={handleSelectProduct}
-                  onIncreaseQuantity={handleIncreaseQuantity}
-                  onDecreaseQuantity={decreaseQuantity}
-                  onToggleLike={toggleLike}
-                  onPushEvent={pushDataLayerEvent}
-                />
+                <div key={product.id} id={product.id}>
+                  <ProductCard
+                    product={product}
+                    selectedProducts={selectedProducts}
+                    likedProducts={likedProducts}
+                    totalItems={totalItems}
+                    maxTotalItems={MAX_TOTAL_ITEMS}
+                    isPriorityImage={index < 6}
+                    getProductKey={getProductKey}
+                    onSelectProduct={handleSelectProduct}
+                    onIncreaseQuantity={handleIncreaseQuantity}
+                    onDecreaseQuantity={decreaseQuantity}
+                    onToggleLike={toggleLike}
+                    onPushEvent={pushDataLayerEvent}
+                    isHighlighted={highlightedProductId === product.id}
+                  />
+                </div>
               ))}
             </div>
 
@@ -520,6 +566,8 @@ export function MenuPage() {
           </div>
         </div>
       )}
+
+      <Footer />
     </div>
   )
 }
