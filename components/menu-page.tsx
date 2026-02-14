@@ -325,11 +325,11 @@ export function MenuPage() {
       <FloatingCartButton totalItems={totalItems} onClick={scrollToCart} />
 
       {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="max-w-6xl mx-auto px-2 py-3">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
           <div className="lg:col-span-2">
-            <div className="mb-6">
-              <h2 className="text-2xl md:text-3xl font-bold mb-2 text-foreground">
+            <div className="mb-3">
+              <h2 className="text-2xl md:text-3xl font-bold mb-1 text-foreground">
                 {selectedCategory || "Todos los Productos"}
               </h2>
               <p className="text-muted-foreground flex items-center gap-2 text-sm">
@@ -343,7 +343,7 @@ export function MenuPage() {
             </div>
 
             {/* Grid de Productos */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               {displayedProducts.map((product, index) => (
                 <div key={product.id} id={product.id}>
                   <ProductCard

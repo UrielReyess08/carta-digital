@@ -126,12 +126,12 @@ export const ProductCard = React.memo(({
       )}
 
       {/* Información del Producto */}
-      <div className="p-3 flex flex-col gap-2">
+      <div className="p-1.5 flex flex-col gap-1">
         <div>
-          <h4 className="font-semibold text-sm md:text-base text-foreground line-clamp-2 min-h-[2.5rem]">
+          <h4 className="font-semibold text-sm md:text-base text-foreground line-clamp-2 min-h-[2rem]">
             {product.name}
           </h4>
-          <p className="text-xl md:text-2xl font-bold text-primary mt-1">
+          <p className="text-xl md:text-2xl font-bold text-primary">
             S/.{product.price.toFixed(2)}
           </p>
         </div>
