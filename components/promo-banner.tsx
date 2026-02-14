@@ -9,16 +9,16 @@ interface PromoBannerProps {
 
 const PROMO_IMAGES = [
   {
-    src: "/promos/PromoFoto.webp",
-    alt: "Piña Colada Promo",
+    src: "/Carrusel/FotoPromo1.webp",
+    alt: "Frappuccino",
   },
   {
-    src: "/Frozen/FrozenFrambuesa.webp",
-    alt: "Frozen Frambuesa",
+    src: "/Carrusel/FotoPromo2.webp",
+    alt: "Piña Colada",
   },
   {
-    src: "/Frozen/FrozenArandano.webp",
-    alt: "Frozen Arándano",
+    src: "/Carrusel/FotoPromo3.webp",
+    alt: "Cappuccino",
   },
 ]
 

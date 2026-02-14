@@ -71,7 +71,7 @@ export const ProductActionButtons = React.memo(({
   // Si NO está seleccionado → botón de agregar
   return (
     <div className="w-full">
-      <div className="text-xs md:text-sm text-center text-muted-foreground font-medium py-2 border border-dashed border-gray-300 rounded-md">
+      <div className="text-xs md:text-sm text-center text-muted-foreground font-medium py-2 border border-dashed border-gray-300 rounded-md" style={{ background: "#ED1B24", borderColor: "#ED1B24", color: "#FFFF" }}>
         Toca para agregar
       </div>
     </div>
