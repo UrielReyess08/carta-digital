@@ -498,7 +498,7 @@ export function MenuPage() {
                 }}
                 placeholder="Número de celular (9 dígitos)"
                 className="w-full rounded-md border border-border px-3 py-2 text-sm"
-                maxLength="9"
+                maxLength={9}
                 inputMode="numeric"
               />
             </div>
