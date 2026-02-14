@@ -36,6 +36,7 @@ export function MenuPage() {
   const [pendingSweetener, setPendingSweetener] = useState<SweetenerOption | null>(null)
   const [pendingSugarSpoons, setPendingSugarSpoons] = useState<number | null>(null)
   const [pendingMilkType, setPendingMilkType] = useState<"Lactosa" | "Deslactosada" | null>(null)
+  const [pendingFlavor, setPendingFlavor] = useState<string | null>(null)
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false)
   const [customerName, setCustomerName] = useState("")
   const [customerPhone, setCustomerPhone] = useState("")
@@ -85,6 +86,7 @@ export function MenuPage() {
     setPendingSweetener(null)
     setPendingSugarSpoons(null)
     setPendingMilkType(null)
+    setPendingFlavor(null)
   }, [])
 
   const handleConfirmOptions = useCallback(() => {
@@ -93,8 +95,9 @@ export function MenuPage() {
     const needsTemperature = Boolean(pendingProduct.temperatureOptions?.length)
     const needsSweetener = Boolean(pendingProduct.sweetenerOptions?.length)
     const isSmootie = pendingProduct.category.includes("SMOOTHIES")
+    const hasFlavor = Boolean(pendingProduct.flavorOptions?.length)
     
-    if ((needsTemperature && !pendingTemperature) || (needsSweetener && !pendingSweetener) || (isSmootie && !pendingMilkType)) {
+    if ((needsTemperature && !pendingTemperature) || (needsSweetener && !pendingSweetener) || (isSmootie && !pendingMilkType) || (hasFlavor && !pendingFlavor)) {
       return
     }
 
@@ -125,8 +128,18 @@ export function MenuPage() {
         pendingSugarSpoons ?? undefined
       )
     } else {
+      let productName = pendingProduct.name
+      if (pendingFlavor) {
+        productName = `${pendingProduct.name} - ${pendingFlavor}`
+      }
+      
+      const productWithFlavor = {
+        ...pendingProduct,
+        name: productName,
+      }
+      
       selectProduct(
-        pendingProduct,
+        productWithFlavor,
         (prod: any) => {
           trackAddProduct(prod)
         },
@@ -139,11 +152,12 @@ export function MenuPage() {
     }
 
     closeOptionsModal()
-  }, [addWithTemperature, addWithMilkType, closeOptionsModal, pendingProduct, pendingSweetener, pendingTemperature, pendingSugarSpoons, pendingMilkType, selectProduct, trackAddProduct, trackStartOrder])
+  }, [addWithTemperature, addWithMilkType, closeOptionsModal, pendingProduct, pendingSweetener, pendingTemperature, pendingSugarSpoons, pendingMilkType, pendingFlavor, selectProduct, trackAddProduct, trackStartOrder])
 
   const handleSelectProduct = useCallback((product: MenuItem) => {
     const isSmootie = product.category.includes("SMOOTHIES")
-    if (product.sweetenerOptions?.length || product.temperatureOptions?.length || isSmootie) {
+    const isSnackOrAdditional = product.category === "SNACKS" || product.category === "ADICIONALES"
+    if (product.sweetenerOptions?.length || product.temperatureOptions?.length || isSmootie || isSnackOrAdditional) {
       openOptionsModal(product)
       return
     }
@@ -335,6 +349,26 @@ export function MenuPage() {
             {pendingProduct.description && (
               <p className="text-xs text-muted-foreground italic mb-4">{pendingProduct.description}</p>
             )}
+            {pendingProduct.flavorOptions?.length && (
+              <div className="mb-4">
+                <p className="text-sm font-semibold text-foreground mb-2">Sabor</p>
+                <div className="flex flex-wrap gap-2">
+                  {pendingProduct.flavorOptions.map((flavor) => (
+                    <button
+                      key={flavor}
+                      onClick={() => setPendingFlavor(flavor)}
+                      className={`rounded-md px-3 py-2 text-sm font-semibold transition-colors ${
+                        pendingFlavor === flavor
+                          ? "bg-primary text-white"
+                          : "bg-gray-100 hover:bg-gray-200"
+                      }`}
+                    >
+                      {flavor}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             {pendingProduct.category.includes("SMOOTHIES") && (
               <div className="mb-4">
                 <p className="text-sm font-semibold text-foreground mb-2">Tipo de leche</p>
@@ -425,7 +459,7 @@ export function MenuPage() {
             <div className="flex flex-col gap-2">
               <button
                 onClick={handleConfirmOptions}
-                disabled={Boolean(pendingProduct.temperatureOptions?.length && !pendingTemperature) || Boolean(pendingProduct.sweetenerOptions?.length && !pendingSweetener) || Boolean(pendingProduct.category.includes("SMOOTHIES") && !pendingMilkType) || Boolean(pendingSweetener && !pendingSugarSpoons)}
+                disabled={Boolean(pendingProduct.temperatureOptions?.length && !pendingTemperature) || Boolean(pendingProduct.sweetenerOptions?.length && !pendingSweetener) || Boolean(pendingProduct.category.includes("SMOOTHIES") && !pendingMilkType) || Boolean(pendingSweetener && !pendingSugarSpoons) || Boolean(pendingProduct.flavorOptions?.length && !pendingFlavor)}
                 className="w-full rounded-md bg-primary px-4 py-2 text-white font-semibold hover:bg-primary/90 disabled:opacity-50"
               >
                 Agregar al pedido
@@ -456,16 +490,22 @@ export function MenuPage() {
                 className="w-full rounded-md border border-border px-3 py-2 text-sm"
               />
               <input
+                type="tel"
                 value={customerPhone}
-                onChange={(e) => setCustomerPhone(e.target.value)}
-                placeholder="Numero de celular"
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^0-9]/g, "")
+                  setCustomerPhone(value)
+                }}
+                placeholder="Número de celular (9 dígitos)"
                 className="w-full rounded-md border border-border px-3 py-2 text-sm"
+                maxLength="9"
+                inputMode="numeric"
               />
             </div>
             <div className="mt-4 flex flex-col gap-2">
               <button
                 onClick={handleConfirmCustomer}
-                disabled={!customerName.trim() || !customerPhone.trim()}
+                disabled={!customerName.trim() || !customerPhone.trim() || customerPhone.length < 9}
                 className="w-full rounded-md bg-green-600 px-4 py-2 text-white font-semibold hover:bg-green-700 disabled:opacity-50"
               >
                 Enviar a WhatsApp

@@ -49,7 +49,8 @@ export const ProductCard = React.memo(({
     (item) => item.id === product.id
   )
   const isSelected = Boolean(selected)
-  const hasOptions = Boolean(product.sweetenerOptions?.length || product.temperatureOptions?.length || product.category.includes("SMOOTHIES"))
+  const isSnackOrAdditional = product.category === "SNACKS" || product.category === "ADICIONALES"
+  const hasOptions = Boolean(product.sweetenerOptions?.length || product.temperatureOptions?.length || product.category.includes("SMOOTHIES") || isSnackOrAdditional)
   const canSelect = (!isSelected && totalItems < maxTotalItems) || (isSelected && hasOptions)
 
   return (
