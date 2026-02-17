@@ -17,10 +17,10 @@ export const MenuHeader = React.memo(({ totalItems }: MenuHeaderProps) => {
               alt="El Vikingo Coffee Bike"
               className="h-14 w-14 object-contain transform scale-140"
             />
-            <div>
+           {/* <div>
               <h1 className="text-2xl font-bold text-primary">El Vikingo</h1>
               <p className="text-sm text-muted-foreground">Coffee Bike Menú Digital</p>
-            </div>
+            </div> */}
           </div>
 
           <div className="flex items-center gap-2">
