@@ -3,13 +3,32 @@
  * Abstrae la lógica de envío de eventos al dataLayer
  */
 export function useAnalytics() {
-  const pushDataLayerEvent = (eventName: string, params: Record<string, any>) => {
+  const pushDataLayerEvent = (
+    eventName: string,
+    params: Record<string, any>,
+    options?: {
+      onComplete?: () => void
+      timeoutMs?: number
+    }
+  ) => {
     if (typeof window === "undefined") return
     ;(window as any).dataLayer = (window as any).dataLayer || []
-    ;(window as any).dataLayer.push({
+    const payload: Record<string, any> = {
       event: eventName,
       ...params,
-    })
+    }
+
+    if (options?.onComplete) {
+      payload.eventCallback = options.onComplete
+      payload.eventTimeout = options.timeoutMs ?? 800
+    }
+
+    ;(window as any).dataLayer.push(payload)
+
+    // Fallback: si GTM no existe, ejecutamos callback para no bloquear UX.
+    if (options?.onComplete && !(window as any).google_tag_manager) {
+      setTimeout(options.onComplete, 0)
+    }
   }
 
   const trackAddProduct = (product: {
@@ -52,11 +71,18 @@ export function useAnalytics() {
     })
   }
 
-  const trackSendOrderWhatsApp = (itemsCount: number, orderValue: number) => {
+  const trackSendOrderWhatsApp = (
+    itemsCount: number,
+    orderValue: number,
+    onComplete?: () => void
+  ) => {
     pushDataLayerEvent("send_order_whatsapp", {
       items_count: itemsCount,
       order_value: Number(orderValue.toFixed(2)),
       page_path: typeof window !== "undefined" ? window.location.pathname : "",
+    }, {
+      onComplete,
+      timeoutMs: 900,
     })
   }
 

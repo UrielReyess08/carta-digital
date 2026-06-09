@@ -206,13 +206,21 @@ export function MenuPage() {
     const message = generateWhatsAppMessage(items, totalPrice, name, phone)
     const whatsappUrl = getWhatsAppLink(message)
 
-    trackSendOrderWhatsApp(totalItems, totalPrice)
+    let hasNavigated = false
+    const navigateToWhatsApp = () => {
+      if (hasNavigated) return
+      hasNavigated = true
+      window.location.href = whatsappUrl
+    }
+
+    trackSendOrderWhatsApp(totalItems, totalPrice, navigateToWhatsApp)
 
     setIsCustomerModalOpen(false)
     setCustomerName("")
     setCustomerPhone("")
 
-    window.location.href = whatsappUrl
+    // Fallback en caso de bloqueo del callback (adblock/GTM no cargado/etc.)
+    setTimeout(navigateToWhatsApp, 1200)
   }, [customerName, customerPhone, selectedProducts, totalItems, totalPrice, trackSendOrderWhatsApp])
 
   const firedScrollThresholds = useRef<Set<number>>(new Set())
